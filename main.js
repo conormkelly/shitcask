@@ -5,22 +5,25 @@ const io = require('socket.io')(http);
 // Init storageEngine
 const config = require('./config');
 const storageEngine = config.initialize();
+const { validateGetArgs, validateSetArgs } = require('./validator');
 
 // Handle GET and SET operations
 io.on('connection', (socket) => {
   console.log('A user connected...');
-  socket.on('set', async ({ key, value }, cb) => {
+  socket.on('set', async (req, cb) => {
     try {
-      await storageEngine.set(key, value);
+      validateSetArgs(req);
+      await storageEngine.set(req.key, req.value);
       cb({ success: true });
     } catch (err) {
       console.log(err);
       cb({ success: false, message: err.message });
     }
   });
-  socket.on('get', async ({ key }, cb) => {
+  socket.on('get', async (req, cb) => {
     try {
-      const value = await storageEngine.get(key);
+      validateGetArgs(req);
+      const value = await storageEngine.get(req.key);
       cb({ success: true, value: value });
     } catch (err) {
       console.log(err);
