@@ -13,6 +13,12 @@ async function main() {
     console.log(value);
   }
 
+  console.time('set a value');
+  const result = await shitcaskClient.set('coolBeans', { coolBeans: true });
+  console.timeEnd('set a value');
+
+  console.log(result);
+
   await shitcaskClient.disconnect();
 }
 

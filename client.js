@@ -1,15 +1,23 @@
 const socketIOClient = require('socket.io-client');
 
+/**
+ * Async client to connect to a `shitcask` server.
+ *
+ * The instance must be connected before attempting to `get` or `set` values.
+ */
 class ShitCaskClient {
   /**
-   *
    * @param {socketIOClient} io
-   * @param {string} serverUrl
    */
   constructor(io) {
     this.io = io;
   }
 
+  /**
+   * Connect to a shitcask server.
+   * @param {{url: string}} config
+   * @returns {Promise<void>}
+   */
   async connect({ url }) {
     return new Promise((resolve, reject) => {
       try {
@@ -37,6 +45,7 @@ class ShitCaskClient {
 
   /**
    * Disconnect from the server.
+   * @returns {Promise<void>}
    */
   async disconnect() {
     return new Promise((resolve, reject) => {
@@ -67,7 +76,11 @@ class ShitCaskClient {
           resolve(response);
         });
       } catch (err) {
-        reject(err);
+        if (!this.isConnected()) {
+          reject(new Error('shitcask is not connected!'));
+        } else {
+          reject(err);
+        }
       }
     });
   }
@@ -86,7 +99,11 @@ class ShitCaskClient {
           resolve(response);
         });
       } catch (err) {
-        reject(err);
+        if (!this.isConnected()) {
+          reject(new Error('shitcask is not connected!'));
+        } else {
+          reject(err);
+        }
       }
     });
   }
