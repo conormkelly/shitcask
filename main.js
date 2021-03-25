@@ -18,7 +18,7 @@ app.use((err, req, res, next) => {
 });
 
 // Handle GET and SET operations
-app.use(async (req, res, next) => {
+app.post('/', async (req, res, next) => {
   try {
     const { key, value } = req.body;
 
@@ -45,7 +45,7 @@ storageEngine.on('ready', () => {
   app.listen(8081, () => {
     console.log('Listening on', 8081);
     console.log(
-      'Send a post request with just "key" in body for GET, or both "key" and "value" for SET.'
+      'Send a POST request with just "key" in body for GET, or both "key" and "value" for SET.'
     );
   });
 });
