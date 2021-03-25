@@ -9,7 +9,7 @@ This project is a reverse-engineered implementation of Bitcask, purely based on 
 ## How do I use it?
 
 1. `npm run local`
-2. Send a `POST` request to `http://localhost:8000/`
+2. Send a `POST` request to `http://localhost:8081/`
 
 - To SET a value, provide both key and value in the request:
 
