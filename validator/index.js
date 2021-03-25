@@ -3,7 +3,11 @@ const schemas = require('./schemas');
 
 // Import and instantiate Ajv
 const Ajv = require('ajv').default;
-const ajv = new Ajv();
+const ajv = new Ajv({ allErrors: true });
+
+// Add ajv-errors
+const ajvErrors = require('ajv-errors');
+ajvErrors(ajv, { singleError: true });
 
 // Compile the schemas into validators
 const getValidator = ajv.compile(schemas.get);
@@ -11,21 +15,21 @@ const setValidator = ajv.compile(schemas.set);
 
 /**
  * Generates a function that applies the validator,
- * and throws error with errorMessage if it's invalid.
+ * and throws an error message (defined in the schema) if it's invalid.
  * @param {*} validator
  * @param {*} errorMessage
  * @returns
  */
-const createValidator = (validator, errorMessage) => {
+const createValidator = (validator) => {
   return function validate(req) {
-    const isValid = validator(req);
-    if (!isValid) {
-      throw new Error(errorMessage);
+    if (!validator(req)) {
+      const [error] = validator.errors;
+      throw new Error(error.message);
     }
   };
 };
 
 module.exports = {
-  validateGetArgs: createValidator(getValidator, 'Expected: { key }'),
-  validateSetArgs: createValidator(setValidator, 'Expected: { key, value }'),
+  validateGetArgs: createValidator(getValidator),
+  validateSetArgs: createValidator(setValidator),
 };

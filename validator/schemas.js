@@ -17,6 +17,12 @@ module.exports = {
     },
     required: ['key', 'value'],
     additionalProperties: false,
+    errorMessage: {
+      required: "'key' and 'value' are required",
+      additionalProperties: "should only provide 'key' and 'value'",
+      type: "should provide an object containing 'key' and 'value'",
+      _: "should provide an object containing only 'key' and 'value'",
+    },
   },
   get: {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -31,5 +37,11 @@ module.exports = {
     },
     required: ['key'],
     additionalProperties: false,
+    errorMessage: {
+      required: "'key' is required",
+      additionalProperties: "should only provide 'key'",
+      type: "should provide an object containing 'key'",
+      _: "should provide an object containing only 'key'",
+    },
   },
 };
