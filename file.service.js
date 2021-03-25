@@ -18,7 +18,7 @@ class FileService {
     this.directory = options.directory;
 
     // TODO: hardcoded for now.
-    this.segmentFile = '0.seg';
+    this.segmentFile = './data/0.seg';
   }
 
   /**
@@ -102,7 +102,7 @@ class FileService {
         // TODO: hardcoded implementation
         // Need to rebuild index as well
         // so major refactor needed
-        const segmentFile = '1.seg';
+        const segmentFile = './data/1.seg';
 
         const writeStream = fs
           .createWriteStream(segmentFile, { flags: 'a' })

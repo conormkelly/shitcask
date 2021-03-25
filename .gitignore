@@ -2,3 +2,6 @@ node_modules/
 
 # Testing
 coverage/
+
+# Test data
+/data/1.seg
