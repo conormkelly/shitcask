@@ -9,14 +9,14 @@ const { validateGetArgs, validateSetArgs } = require('./validator');
 
 // Handle GET and SET operations
 io.on('connection', (socket) => {
-  console.log('A user connected...');
+  console.log(`Client connected - ID: ${socket.id}`);
   socket.on('set', async (req, cb) => {
     try {
       validateSetArgs(req);
       await storageEngine.set(req.key, req.value);
       cb({ success: true });
     } catch (err) {
-      console.log(err);
+      console.log('SetError', err.message);
       cb({ success: false, message: err.message });
     }
   });
@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
       const value = await storageEngine.get(req.key);
       cb({ success: true, value: value });
     } catch (err) {
-      console.log(err);
+      console.log('GetError:', err.message);
       cb({ success: false, message: err.message });
     }
   });

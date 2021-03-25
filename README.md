@@ -26,8 +26,15 @@ The client and server communicate using [socket.io](https://www.npmjs.com/packag
 
 The client uses an async-await / promise-based API.
 
-_The segment file is hardcoded for now but will be dynamically compacted in future._
+## TODO
 
-### More info
+Where to start...
 
-- [Bitcask on Wikipedia](https://en.wikipedia.org/wiki/Bitcask)
+- Restructure file.service.
+  - This is a bit of a mish-mash of generic "file system" methods and methods related to writing the segment file.
+- Revamp the folder structure, everything is a bit flat at the moment.
+- Implement ability to define user-defined data directory.
+- Add tests.
+- Undergo performance testing.
+- Implement request queue.
+- Implement compaction strategy.
