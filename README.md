@@ -12,8 +12,10 @@ _I can't believe it's not [Bitcask](https://en.wikipedia.org/wiki/Bitcask)_...
 
 ## How do I use it?
 
-1. Start the server via: `npm run local`
-2. `node ./demo.js` to run the demo client queries.
+1. Start the server via: `npm start`
+2. In a separate terminal, run: `npm run demo` to run the demo client queries.
+
+You should then be able to review the logs in the client and server terminals.
 
 _The client will be split into a separate repo in future._
 
@@ -38,3 +40,4 @@ Where to start...
 - Undergo performance testing.
 - Implement request queue.
 - Implement compaction strategy.
+- Add auth.
