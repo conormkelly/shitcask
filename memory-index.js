@@ -31,8 +31,25 @@ function setAll(keyOffsets) {
   });
 }
 
+/**
+ * Determines the number of keys in the index.
+ */
+function size() {
+  return memoryIndex.size;
+}
+
+/**
+ * Get an iterable of [key, value] pairs in the map.
+ * @returns IterableIterator<any, number>
+ */
+function getEntries() {
+  return memoryIndex.entries();
+}
+
 module.exports = {
   get,
   set,
   setAll,
+  size,
+  getEntries,
 };

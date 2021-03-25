@@ -13,8 +13,17 @@ class StorageEngine extends EventEmitter {
     super();
     this.memoryIndex = memoryIndex;
     this.fileService = fileService;
+
+    console.time('Index build');
     this._buildIndex().then(() => {
-      this.emit('ready');
+      console.timeEnd('Index build');
+      console.log('Index size', this.memoryIndex.size());
+
+      console.time('Compaction');
+      this._doCompaction().then(() => {
+        console.timeEnd('Compaction');
+        this.emit('ready');
+      });
     });
   }
 
@@ -24,8 +33,10 @@ class StorageEngine extends EventEmitter {
    * @param {any} value
    */
   async set(key, value) {
+    console.time('set operation');
     const offset = await this.fileService.write(key, value);
     this.memoryIndex.set(key, offset);
+    console.timeEnd('set operation');
   }
 
   /**
@@ -34,8 +45,12 @@ class StorageEngine extends EventEmitter {
    * @returns
    */
   async get(key) {
+    console.time('get operation');
     const offset = this.memoryIndex.get(key);
-    return offset !== undefined ? await this.fileService.read(offset) : null;
+    const value =
+      offset !== undefined ? await this.fileService.read(offset) : null;
+    console.timeEnd('get operation');
+    return value;
   }
 
   /**
@@ -56,6 +71,13 @@ class StorageEngine extends EventEmitter {
   async _buildIndex() {
     const keyOffsetArray = await this.fileService.getSegmentOffsets();
     this.memoryIndex.setAll(keyOffsetArray);
+  }
+
+  async _doCompaction() {
+    // TODO: This works but it's slow
+    // and it doesnt switch over to the new file
+    const indexEntries = this.memoryIndex.getEntries();
+    await this.fileService.writeSegmentFile(indexEntries);
   }
 }
 

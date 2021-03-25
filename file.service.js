@@ -95,6 +95,43 @@ class FileService {
 
     return segmentOffsets;
   }
+
+  async writeSegmentFile(indexEntries) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // TODO: hardcoded implementation
+        // Need to rebuild index as well
+        // so major refactor needed
+        const segmentFile = '1.seg';
+
+        const writeStream = fs
+          .createWriteStream(segmentFile, { flags: 'a' })
+          .on('error', function (err) {
+            reject(err);
+          })
+          .on('finish', () => {
+            resolve(segmentFile);
+          });
+
+        // need to track offsets of new files
+        for (const [key, offset] of indexEntries) {
+          const value = await this.read(offset);
+          // // TODO: horribly inefficient
+          // const length = JSON.stringify(`${value}\n`).length;
+          const data = JSON.stringify({ k: key, v: value });
+          writeStream.write(`${data}\n`, (err) => {
+            if (err) {
+              reject(err);
+            }
+          });
+        }
+
+        writeStream.end();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 }
 
 module.exports = FileService;
