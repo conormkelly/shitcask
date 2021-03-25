@@ -3,21 +3,26 @@ const shitcaskClient = require('./client').default;
 async function main() {
   await shitcaskClient.connect({ url: 'http://localhost:8081/' });
 
-  const valuesToGet = ['123', null, 'xyz', undefined, 3, 'XYZ'];
+  const keysToLookup = ['123', null, 'xyz', undefined, 3, 'XYZ', 'test'];
 
-  // Try to get values in the above array and log the time taken
-  for (const val of valuesToGet) {
-    console.time(`${val} - get`);
-    const value = await shitcaskClient.get(val);
-    console.timeEnd(`${val} - get`);
-    console.log(value);
+  console.log(
+    `Get keys: ${JSON.stringify(keysToLookup)}, and log the time taken:\n`
+  );
+
+  for (const key of keysToLookup) {
+    console.time(`Key: ${key}`);
+    const value = await shitcaskClient.get(key);
+    console.timeEnd(`Key: ${key}`);
+    console.log('Value:', value, '\n');
   }
 
-  console.time('set a value');
-  const result = await shitcaskClient.set('coolBeans', { coolBeans: true });
-  console.timeEnd('set a value');
+  console.log('Set a value and log the time taken:\n');
 
-  console.log(result);
+  console.time('set "coolBeans"');
+  const response = await shitcaskClient.set('coolBeans', { coolBeans: true });
+  console.timeEnd('set "coolBeans"');
+
+  console.log(response);
 
   await shitcaskClient.disconnect();
 }
