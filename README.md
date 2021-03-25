@@ -12,8 +12,9 @@ _I can't believe it's not [Bitcask](https://en.wikipedia.org/wiki/Bitcask)_...
 
 ## How do I use it?
 
-1. Start the server via: `npm start`
-2. In a separate terminal, run: `npm run demo` to run the demo client queries.
+1. `npm install`
+2. Start the server via: `npm start`
+3. In a separate terminal, run: `npm run demo` to run the demo client queries.
 
 You should then be able to review the logs in the client and server terminals.
 
