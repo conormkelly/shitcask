@@ -13,7 +13,7 @@ async function main() {
     console.time(`Key: ${key}`);
     const value = await shitcaskClient.get(key);
     console.timeEnd(`Key: ${key}`);
-    console.log('Value:', value, '\n');
+    console.log('Response:', value, '\n');
   }
 
   console.log('Set a value and log the time taken:\n');
