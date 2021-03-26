@@ -8,7 +8,7 @@ const memoryIndex = require('./memory-index');
 const FileService = require('./file.service');
 
 function initialize() {
-  const dbDirectory = process.env.SHITCASK_DATA_DIRECTORY || './data';
+  const dbDirectory = process.env.SHITCASK_DATA_DIRECTORY || './__tests__/data';
 
   console.log('DATA_DIRECTORY:', dbDirectory);
 

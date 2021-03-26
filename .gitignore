@@ -4,4 +4,4 @@ node_modules/
 coverage/
 
 # Test data
-/data/1.seg
+/__tests__/data/

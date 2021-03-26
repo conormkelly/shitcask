@@ -74,6 +74,9 @@ class StorageEngine extends EventEmitter {
   }
 
   async _doCompaction() {
+    // TODO: temp
+    return;
+
     if (this.memoryIndex.size() > 0) {
       // TODO: This works but it's slow
       // and it doesnt switch over to the new file

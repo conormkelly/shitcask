@@ -3,7 +3,7 @@ const shitcaskClient = require('./client').default;
 async function main() {
   await shitcaskClient.connect({ url: 'http://localhost:8081/' });
 
-  const keysToLookup = ['123', null, 'xyz', undefined, 3, 'XYZ', 'test'];
+  const keysToLookup = ['123', null, 'ir; we did', undefined, 3, 'friendship'];
 
   console.log(
     `Get keys: ${JSON.stringify(keysToLookup)}, and log the time taken:\n`
