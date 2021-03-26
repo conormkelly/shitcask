@@ -8,15 +8,12 @@ const memoryIndex = require('./memory-index');
 const FileService = require('./file.service');
 
 function initialize() {
-  const dbDirectory = process.env.SHITCASK_DATA_DIRECTORY || './__tests__/data';
+  const directory = process.env.SHITCASK_DATA_DIRECTORY || './__tests__/data';
 
-  console.log('DATA_DIRECTORY:', dbDirectory);
+  console.log('DATA_DIRECTORY:', directory);
 
-  const fileService = new FileService(fs, readline, {
-    directory: dbDirectory,
-  });
-
-  return new StorageEngine(memoryIndex, fileService);
+  const fileService = new FileService(fs, readline);
+  return new StorageEngine(memoryIndex, fileService, { directory });
 }
 
 module.exports = { initialize };

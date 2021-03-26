@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const EventEmitter = require('events');
 
 const memoryIndex = require('./memory-index');
@@ -8,23 +11,45 @@ class StorageEngine extends EventEmitter {
    *
    * @param {memoryIndex} memoryIndex
    * @param {FileService} fileService
+   * @param {{directory: fs.PathLike | string }} config
    */
-  constructor(memoryIndex, fileService) {
+  constructor(memoryIndex, fileService, { directory }) {
     super();
+    // Dependencies
     this.memoryIndex = memoryIndex;
     this.fileService = fileService;
+    // Config
+    this.directory = directory;
 
-    console.time('Index build');
-    this._buildIndex().then(() => {
-      console.timeEnd('Index build');
-      console.log('Index size', this.memoryIndex.size());
-
-      console.time('Check compaction');
-      this._doCompaction().then(() => {
-        console.timeEnd('Check compaction');
-        this.emit('ready');
-      });
+    // Perform setup tasks
+    this.initializeSegmentFile().then(() => {
+      this.emit('ready');
     });
+  }
+
+  async initializeSegmentFile() {
+    // TODO: hardcoded name here - need to check dir for existing files
+    const segmentFilePath = path.resolve(this.directory, '0.seg');
+    console.log('segmentFile:', segmentFilePath);
+    const segmentFd = await this.fileService.getFileDescriptor(
+      segmentFilePath,
+      'a'
+    );
+
+    this.segmentFd = segmentFd;
+  }
+
+  /**
+   * Builds the index of offsets based on the latest segment file.
+   * TODO: future - lot of work to be done here, if file doesn't exist, multiple files etc
+   * @private
+   */
+  async _buildIndex() {
+    console.log('BI FD:', this.segmentFd);
+    const keyOffsetArray = await this.fileService.getSegmentOffsets(
+      this.segmentFd
+    );
+    this.memoryIndex.setAll(keyOffsetArray);
   }
 
   /**
@@ -34,7 +59,11 @@ class StorageEngine extends EventEmitter {
    */
   async set(key, value) {
     console.time('set operation');
-    const offset = await this.fileService.write(key, value);
+    const offset = await this.fileService.appendToFile(
+      this.segmentFd,
+      `${JSON.stringify({ k: key, v: value })}\n`
+    );
+    console.log('THE OFFSET IS', offset);
     this.memoryIndex.set(key, offset);
     console.timeEnd('set operation');
   }
@@ -48,43 +77,11 @@ class StorageEngine extends EventEmitter {
     console.time('get operation');
     const offset = this.memoryIndex.get(key);
     const value =
-      offset !== undefined ? await this.fileService.read(offset) : null;
+      offset !== undefined
+        ? await this.fileService.readLineFromOffset(this.segmentFd, this.offset)
+        : null;
     console.timeEnd('get operation');
     return value;
-  }
-
-  /**
-   * Delete the key.
-   * This is really a soft delete - should be visible in the logs until
-   * compaction occurs, which is not implemented yet.
-   * @param {*} key
-   */
-  async delete(key) {
-    await this.set(key, null);
-  }
-
-  /**
-   * Builds the index of offsets based on the latest segment file.
-   * TODO: future - lot of work to be done here, if file doesn't exist, multiple files etc
-   * @private
-   */
-  async _buildIndex() {
-    const keyOffsetArray = await this.fileService.getSegmentOffsets();
-    this.memoryIndex.setAll(keyOffsetArray);
-  }
-
-  async _doCompaction() {
-    // TODO: temp
-    return;
-
-    if (this.memoryIndex.size() > 0) {
-      // TODO: This works but it's slow
-      // and it doesnt switch over to the new file
-      const indexEntries = this.memoryIndex.getEntries();
-      await this.fileService.writeSegmentFile(indexEntries);
-    } else {
-      console.log('No compaction required - memoryIndex empty');
-    }
   }
 }
 
