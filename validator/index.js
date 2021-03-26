@@ -16,9 +16,8 @@ const setValidator = ajv.compile(schemas.set);
 /**
  * Generates a function that applies the validator,
  * and throws an error message (defined in the schema) if it's invalid.
- * @param {*} validator
- * @param {*} errorMessage
- * @returns
+ * @param {Function} validator
+ * @returns {Function}
  */
 const createValidator = (validator) => {
   return function validate(req) {
