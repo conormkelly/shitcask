@@ -4,6 +4,13 @@ const socketIOClient = require('socket.io-client');
  * Async client to connect to a `shitcask` server.
  *
  * The instance must be connected before attempting to `get` or `set` values.
+ *
+ * Default config:
+ * ```json
+ * {
+ *   "timeoutMs": 5000
+ * }
+ * ```
  */
 class ShitCaskClient {
   /**
@@ -11,19 +18,33 @@ class ShitCaskClient {
    */
   constructor(io) {
     this.io = io;
+    this.timeoutMs = 5000;
   }
 
   /**
    * Connect to a shitcask server.
-   * @param {{url: string}} config
+   * @param {{url: string, timeout?: number}} config
    * @returns {Promise<void>}
    */
-  async connect({ url }) {
+  async connect({ url, timeout }) {
     return new Promise((resolve, reject) => {
+      if (timeout !== undefined) {
+        this.timeoutMs = timeout;
+      }
+
       try {
         if (!this.isConnected()) {
           this.socket = this.io(url);
+
+          // socket.io will retry forever, so set a timer
+          // to give up if server unavailable
+          this.socket._firstConnectionTimer = setTimeout(() => {
+            this.socket.close();
+            reject(new Error('Initial connection timed out'));
+          }, this.timeoutMs);
+
           this.socket.on('connect', () => {
+            clearTimeout(this.socket._firstConnectionTimer);
             resolve();
           });
         } else {
