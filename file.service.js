@@ -3,6 +3,8 @@
 const fs = require('fs');
 const readline = require('readline');
 
+const path = require('path');
+
 class FileService {
   /**
    *
@@ -18,7 +20,9 @@ class FileService {
     this.directory = options.directory;
 
     // TODO: hardcoded for now.
-    this.segmentFile = './data/0.seg';
+    this.segmentFile = path.resolve(this.directory, '0.seg');
+
+    console.log('segmentFile', this.segmentFile);
   }
 
   /**

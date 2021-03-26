@@ -19,9 +19,9 @@ class StorageEngine extends EventEmitter {
       console.timeEnd('Index build');
       console.log('Index size', this.memoryIndex.size());
 
-      console.time('Compaction');
+      console.time('Check compaction');
       this._doCompaction().then(() => {
-        console.timeEnd('Compaction');
+        console.timeEnd('Check compaction');
         this.emit('ready');
       });
     });
@@ -74,10 +74,14 @@ class StorageEngine extends EventEmitter {
   }
 
   async _doCompaction() {
-    // TODO: This works but it's slow
-    // and it doesnt switch over to the new file
-    const indexEntries = this.memoryIndex.getEntries();
-    await this.fileService.writeSegmentFile(indexEntries);
+    if (this.memoryIndex.size() > 0) {
+      // TODO: This works but it's slow
+      // and it doesnt switch over to the new file
+      const indexEntries = this.memoryIndex.getEntries();
+      await this.fileService.writeSegmentFile(indexEntries);
+    } else {
+      console.log('No compaction required - memoryIndex empty');
+    }
   }
 }
 

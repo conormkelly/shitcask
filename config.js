@@ -8,8 +8,9 @@ const memoryIndex = require('./memory-index');
 const FileService = require('./file.service');
 
 function initialize() {
-  // TODO: future - directory isn't currently considered
-  const dbDirectory = process.env.MY_DB_DIRECTORY || '.';
+  const dbDirectory = process.env.SHITCASK_DATA_DIRECTORY || './data';
+
+  console.log('DATA_DIRECTORY:', dbDirectory);
 
   const fileService = new FileService(fs, readline, {
     directory: dbDirectory,
