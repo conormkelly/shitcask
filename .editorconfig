@@ -1,2 +1,5 @@
-[*]
+[*.seg]
 end_of_line = lf
+
+[*.js]
+quote_type = single

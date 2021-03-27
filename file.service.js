@@ -3,71 +3,43 @@
 const fs = require('fs');
 const readline = require('readline');
 
-const path = require('path');
-
 class FileService {
   /**
-   *
    * @param {fs} fs
    * @param {readline} readline
-   * @param {{directory: fs.PathLike | string, segmentFile: string}} options
    */
-  constructor(fs, readline, options) {
+  constructor(fs, readline) {
     // Dependencies
     this.fs = fs;
     this.readline = readline;
-    // Config
-    this.directory = options.directory;
-
-    // TODO: hardcoded for now.
-    this.segmentFile = path.resolve(this.directory, '0.seg');
-
-    console.log('segmentFile', this.segmentFile);
   }
 
   /**
-   * Reads the value of a key via the offset.
-   * TODO: there has to be a better way to implement this, with a buffer maybe?
-   * @param {number} offset
-   * @returns Value located at the key offset.
+   * @param {fs.PathLike} filePath File path.
+   * @param {number} offset Position within the file.
    */
-  async read(offset) {
-    const rs = this.fs.createReadStream(this.segmentFile, {
-      start: offset,
-    });
-
-    const rl = this.readline.createInterface({
-      input: rs,
-    });
-
-    for await (const line of rl) {
-      rl.close();
-      rs.close();
-      // "value" property of the parsed line
-      return JSON.parse(line).v;
-    }
-  }
-
-  /**
-   * Writes a key-value pair to segment file and returns the offset.
-   * @param {any} key
-   * @param {any} value
-   * @returns The offset.
-   */
-  async write(key, value) {
+  async readLineFromOffset(filePath, offset) {
     return new Promise((resolve, reject) => {
       try {
-        this.fs.stat(this.segmentFile, (err, stats) => {
-          // We dont care if the file doesn't exist yet,
-          // since append will create it if it doesn't
-          if (err && !err.message.includes('no such file')) {
-            throw err;
-          }
-          const offset = stats && 'size' in stats ? stats.size : 0;
-          const data = `${JSON.stringify({ k: key, v: value })}\n`;
-          this.fs.appendFile(this.segmentFile, data, () => {
-            resolve(offset);
-          });
+        const rs = this.fs.createReadStream(filePath, {
+          start: offset,
+        });
+
+        const rl = readline.createInterface({
+          input: rs,
+          console: false,
+        });
+
+        rl.on('error', (err) => {
+          rs.close();
+          rl.close();
+          reject(err);
+        });
+
+        rl.on('line', (line) => {
+          rs.close();
+          rl.close();
+          resolve(line);
         });
       } catch (err) {
         reject(err);
@@ -75,62 +47,64 @@ class FileService {
     });
   }
 
-  async getSegmentOffsets() {
-    const rs = this.fs.createReadStream(this.segmentFile, {
-      start: 0,
-    });
-
-    const rl = this.readline.createInterface({
-      input: rs,
-    });
-
-    const segmentOffsets = [];
-
-    let position = { current: 0, next: 0 };
-    for await (const line of rl) {
-      position.next = position.current + Buffer.byteLength(`${line}\n`, 'utf8');
-      const parsedLine = JSON.parse(line);
-      segmentOffsets.push({ key: parsedLine.k, offset: position.current });
-      position.current = position.next;
-    }
-
-    rl.close();
-    rs.close();
-
-    return segmentOffsets;
-  }
-
-  async writeSegmentFile(indexEntries) {
+  async appendToFile(filePath, data) {
     return new Promise(async (resolve, reject) => {
       try {
-        // TODO: hardcoded implementation
-        // Need to rebuild index as well
-        // so major refactor needed
-        const segmentFile = './data/1.seg';
+        // FIXME: will fail if file doesn't exist
+        const stats = await this.stat(filePath);
+        const offset = stats.size;
 
-        const writeStream = fs
-          .createWriteStream(segmentFile, { flags: 'a' })
-          .on('error', function (err) {
-            reject(err);
-          })
-          .on('finish', () => {
-            resolve(segmentFile);
-          });
+        const ws = this.fs.createWriteStream(filePath, {
+          start: offset,
+          // Change to a+ when I implement fix for above
+          flags: 'a',
+        });
 
-        // need to track offsets of new files
-        for (const [key, offset] of indexEntries) {
-          const value = await this.read(offset);
-          // // TODO: horribly inefficient
-          // const length = JSON.stringify(`${value}\n`).length;
-          const data = JSON.stringify({ k: key, v: value });
-          writeStream.write(`${data}\n`, (err) => {
-            if (err) {
-              reject(err);
-            }
-          });
+        ws.on('error', (err) => {
+          reject(err);
+        });
+
+        ws.cork();
+        ws.write(data);
+        process.nextTick(() => {
+          ws.uncork();
+          resolve(offset);
+        });
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  async stat(filePath) {
+    return this.fs.promises.stat(filePath);
+  }
+
+  async getSegmentOffsets(filePath) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const rs = this.fs.createReadStream(filePath);
+
+        const rl = this.readline.createInterface({
+          input: rs,
+          console: false,
+        });
+
+        const segmentOffsets = [];
+
+        let position = { current: 0, next: 0 };
+        for await (const line of rl) {
+          position.next =
+            position.current + Buffer.byteLength(`${line}\n`, 'utf8');
+          const parsedLine = JSON.parse(line);
+          segmentOffsets.push({ key: parsedLine.k, offset: position.current });
+          position.current = position.next;
         }
 
-        writeStream.end();
+        rl.close();
+        rs.close();
+
+        resolve(segmentOffsets);
       } catch (err) {
         reject(err);
       }
