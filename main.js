@@ -2,6 +2,8 @@
 const http = require('http').createServer();
 const io = require('socket.io')(http);
 
+const logger = require('./logger');
+
 // Init storageEngine
 const config = require('./config');
 const storageEngine = config.initialize();
@@ -9,14 +11,14 @@ const { validateGetArgs, validateSetArgs } = require('./validator');
 
 // Handle GET and SET operations
 io.on('connection', (socket) => {
-  console.log(`Client connected - ID: ${socket.id}`);
+  logger.info(`Client connected - ID: ${socket.id}`);
   socket.on('set', async (req, cb) => {
     try {
       validateSetArgs(req);
       await storageEngine.set(req.key, req.value);
       cb({ success: true });
     } catch (err) {
-      console.log('SetError', err.message);
+      logger.warn(`SetError (${socket.id}) : ${err.message}`);
       cb({ success: false, message: err.message });
     }
   });
@@ -26,16 +28,19 @@ io.on('connection', (socket) => {
       const value = await storageEngine.get(req.key);
       cb({ success: true, value: value });
     } catch (err) {
-      console.log('GetError:', err.message);
+      logger.warn(`GetError (${socket.id}) : ${err.message}`);
       cb({ success: false, message: err.message });
     }
   });
 });
 
 // Listen when storageEngine is ready
+
+// TODO: externalize PORT
+const PORT = 8081;
 storageEngine.on('ready', () => {
-  console.log('storageEngine: READY');
-  http.listen(8081, () => {
-    console.log('Listening on', 8081);
+  logger.info('StorageEngine: READY');
+  http.listen(PORT, () => {
+    logger.info(`Server: Listening on ${PORT}`);
   });
 });

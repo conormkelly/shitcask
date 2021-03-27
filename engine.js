@@ -5,6 +5,7 @@ const EventEmitter = require('events');
 
 const memoryIndex = require('./memory-index');
 const FileService = require('./file.service');
+const logger = require('./logger');
 
 class StorageEngine extends EventEmitter {
   /**
@@ -22,14 +23,20 @@ class StorageEngine extends EventEmitter {
     this.directory = directory;
 
     // Perform setup tasks
-    this.initializeSegmentFile().then(() => {
-      this._buildIndex().then(() => {
-        this.emit('ready');
+    this.initializeSegmentFile()
+      .then(() => {
+        this._buildIndex().then(() => {
+          this.emit('ready');
+        });
+      })
+      .catch((err) => {
+        logger.error(`Storage engine setup failed: ${err.message}`);
+        process.exit(1);
       });
-    });
   }
 
   async initializeSegmentFile() {
+    logger.info("Startup: Initializing segment file");
     // TODO: hardcoded name here - need to check dir for existing files
     this.segmentFilePath = path.resolve(this.directory, '0.seg');
   }
@@ -40,6 +47,8 @@ class StorageEngine extends EventEmitter {
    * @private
    */
   async _buildIndex() {
+    logger.info("Startup: Building the index");
+
     const keyOffsetArray = await this.fileService.getSegmentOffsets(
       this.segmentFilePath
     );
@@ -52,13 +61,11 @@ class StorageEngine extends EventEmitter {
    * @param {any} value
    */
   async set(key, value) {
-    console.time('set operation');
     const offset = await this.fileService.appendToFile(
       this.segmentFilePath,
       `${JSON.stringify({ k: key, v: value })}\n`
     );
     this.memoryIndex.set(key, offset);
-    console.timeEnd('set operation');
   }
 
   /**
@@ -67,7 +74,6 @@ class StorageEngine extends EventEmitter {
    * @returns
    */
   async get(key) {
-    console.time('get operation');
     const offset = this.memoryIndex.get(key);
     const value =
       offset !== undefined
@@ -76,9 +82,7 @@ class StorageEngine extends EventEmitter {
             offset
           )
         : null;
-    const res = value ? JSON.parse(value).v : value;
-    console.timeEnd('get operation');
-    return res;
+    return value ? JSON.parse(value).v : value;
   }
 }
 

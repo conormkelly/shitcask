@@ -33,10 +33,8 @@ The client uses an async-await / promise-based API.
 
 Where to start...
 
-- Restructure file.service.
-  - This is a bit of a mish-mash of generic "file system" methods and methods related to writing the segment file.
-- Revamp the folder structure, everything is a bit flat at the moment.
 - Implement ability to define user-defined data directory.
+- Revamp the folder structure, everything is a bit flat at the moment.
 - Add tests.
 - Undergo performance testing.
 - Implement request queue.
