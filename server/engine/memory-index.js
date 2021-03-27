@@ -40,7 +40,7 @@ function size() {
 
 /**
  * Get an iterable of [key, value] pairs in the map.
- * @returns IterableIterator<any, number>
+ * @returns IterableIterator<[any, number]>
  */
 function getEntries() {
   return memoryIndex.entries();
