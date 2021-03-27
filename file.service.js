@@ -21,20 +21,22 @@ class FileService {
   async readLineFromOffset(filePath, offset) {
     return new Promise((resolve, reject) => {
       try {
-        const rs = this.fs.createReadStream(filePath, {
-          start: offset,
-        });
+        const rs = this.fs
+          .createReadStream(filePath, {
+            start: offset,
+          })
+          .on('error', (err) => {
+            reject(err);
+          });
 
-        const rl = readline.createInterface({
-          input: rs,
-          console: false,
-        });
-
-        rl.on('error', (err) => {
-          rs.close();
-          rl.close();
-          reject(err);
-        });
+        const rl = readline
+          .createInterface({
+            input: rs,
+            console: false,
+          })
+          .on('error', (err) => {
+            reject(err);
+          });
 
         rl.on('line', (line) => {
           rs.close();
@@ -54,15 +56,15 @@ class FileService {
         const stats = await this.stat(filePath);
         const offset = stats.size;
 
-        const ws = this.fs.createWriteStream(filePath, {
-          start: offset,
-          // Change to a+ when I implement fix for above
-          flags: 'a',
-        });
-
-        ws.on('error', (err) => {
-          reject(err);
-        });
+        const ws = this.fs
+          .createWriteStream(filePath, {
+            start: offset,
+            // Change to a+ when I implement fix for above
+            flags: 'a',
+          })
+          .on('error', (err) => {
+            reject(err);
+          });
 
         ws.cork();
         ws.write(data);
@@ -83,12 +85,18 @@ class FileService {
   async getSegmentOffsets(filePath) {
     return new Promise(async (resolve, reject) => {
       try {
-        const rs = this.fs.createReadStream(filePath);
-
-        const rl = this.readline.createInterface({
-          input: rs,
-          console: false,
+        const rs = this.fs.createReadStream(filePath).on('error', (err) => {
+          reject(err);
         });
+
+        const rl = this.readline
+          .createInterface({
+            input: rs,
+            console: false,
+          })
+          .on('error', (err) => {
+            reject(err);
+          });
 
         const segmentOffsets = [];
 
