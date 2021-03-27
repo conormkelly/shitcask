@@ -23,20 +23,15 @@ class StorageEngine extends EventEmitter {
 
     // Perform setup tasks
     this.initializeSegmentFile().then(() => {
-      this.emit('ready');
+      this._buildIndex().then(() => {
+        this.emit('ready');
+      });
     });
   }
 
   async initializeSegmentFile() {
     // TODO: hardcoded name here - need to check dir for existing files
-    const segmentFilePath = path.resolve(this.directory, '0.seg');
-    console.log('segmentFile:', segmentFilePath);
-    const segmentFd = await this.fileService.getFileDescriptor(
-      segmentFilePath,
-      'a'
-    );
-
-    this.segmentFd = segmentFd;
+    this.segmentFilePath = path.resolve(this.directory, '0.seg');
   }
 
   /**
@@ -45,9 +40,8 @@ class StorageEngine extends EventEmitter {
    * @private
    */
   async _buildIndex() {
-    console.log('BI FD:', this.segmentFd);
     const keyOffsetArray = await this.fileService.getSegmentOffsets(
-      this.segmentFd
+      this.segmentFilePath
     );
     this.memoryIndex.setAll(keyOffsetArray);
   }
@@ -60,10 +54,9 @@ class StorageEngine extends EventEmitter {
   async set(key, value) {
     console.time('set operation');
     const offset = await this.fileService.appendToFile(
-      this.segmentFd,
+      this.segmentFilePath,
       `${JSON.stringify({ k: key, v: value })}\n`
     );
-    console.log('THE OFFSET IS', offset);
     this.memoryIndex.set(key, offset);
     console.timeEnd('set operation');
   }
@@ -78,10 +71,14 @@ class StorageEngine extends EventEmitter {
     const offset = this.memoryIndex.get(key);
     const value =
       offset !== undefined
-        ? await this.fileService.readLineFromOffset(this.segmentFd, this.offset)
+        ? await this.fileService.readLineFromOffset(
+            this.segmentFilePath,
+            offset
+          )
         : null;
+    const res = value ? JSON.parse(value).v : value;
     console.timeEnd('get operation');
-    return value;
+    return res;
   }
 }
 

@@ -15,27 +15,25 @@ class FileService {
   }
 
   /**
-   * Get the file descriptor by filename.
-   * @param {fs.PathLike} filename
-   * @param { 'r' | 'w' | 'a' } mode
-   * @returns {Promise<number>} File descriptor.
-   */
-  async getFileDescriptor(filename, mode) {
-    return this.fs.promises.open(filename, mode);
-  }
-
-  /**
-   * @param {number} fd File descriptor.
+   * @param {fs.PathLike} filePath File path.
    * @param {number} offset Position within the file.
    */
-  async readLineFromOffset(fd, offset) {
+  async readLineFromOffset(filePath, offset) {
     return new Promise((resolve, reject) => {
       try {
-        const rs = this.fs.createReadStream(null, { fd, start: offset });
+        const rs = this.fs.createReadStream(filePath, {
+          start: offset,
+        });
 
         const rl = readline.createInterface({
           input: rs,
           console: false,
+        });
+
+        rl.on('error', (err) => {
+          rs.close();
+          rl.close();
+          reject(err);
         });
 
         rl.on('line', (line) => {
@@ -49,40 +47,68 @@ class FileService {
     });
   }
 
-  async appendToFile(fd, data) {
-    // TODO: reimplement with writeStream
-    // Only writes to file if server closes... hmm
-    const stats = await this.stat(fd);
-    await fd.appendFile(data);
-    return stats.size;
-  }
+  async appendToFile(filePath, data) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // FIXME: will fail if file doesn't exist
+        const stats = await this.stat(filePath);
+        const offset = stats.size;
 
-  async stat(fd) {
-    return fd.stat();
-  }
+        const ws = this.fs.createWriteStream(filePath, {
+          start: offset,
+          // Change to a+ when I implement fix for above
+          flags: 'a',
+        });
 
-  async getSegmentOffsets(fd) {
-    const rs = this.fs.createReadStream(null, { fd, start: 0 });
+        ws.on('error', (err) => {
+          reject(err);
+        });
 
-    const rl = this.readline.createInterface({
-      input: rs,
-      console: false,
+        ws.cork();
+        ws.write(data);
+        process.nextTick(() => {
+          ws.uncork();
+          resolve(offset);
+        });
+      } catch (err) {
+        reject(err);
+      }
     });
+  }
 
-    const segmentOffsets = [];
+  async stat(filePath) {
+    return this.fs.promises.stat(filePath);
+  }
 
-    let position = { current: 0, next: 0 };
-    for await (const line of rl) {
-      position.next = position.current + Buffer.byteLength(`${line}\n`, 'utf8');
-      const parsedLine = JSON.parse(line);
-      segmentOffsets.push({ key: parsedLine.k, offset: position.current });
-      position.current = position.next;
-    }
+  async getSegmentOffsets(filePath) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const rs = this.fs.createReadStream(filePath);
 
-    rl.close();
-    rs.close();
+        const rl = this.readline.createInterface({
+          input: rs,
+          console: false,
+        });
 
-    return segmentOffsets;
+        const segmentOffsets = [];
+
+        let position = { current: 0, next: 0 };
+        for await (const line of rl) {
+          position.next =
+            position.current + Buffer.byteLength(`${line}\n`, 'utf8');
+          const parsedLine = JSON.parse(line);
+          segmentOffsets.push({ key: parsedLine.k, offset: position.current });
+          position.current = position.next;
+        }
+
+        rl.close();
+        rs.close();
+
+        resolve(segmentOffsets);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 }
 
