@@ -1,7 +1,11 @@
 const shitcaskClient = require('./client').default;
 
 async function main() {
-  await shitcaskClient.connect({ url: 'http://localhost:8081/' });
+  const socketId = await shitcaskClient.connect({
+    url: 'http://localhost:8081/',
+  });
+
+  console.log('The socketId is', socketId, '\n');
 
   const keysToLookup = ['123', null, 'ir; we did', undefined, 3, 'friendship'];
 

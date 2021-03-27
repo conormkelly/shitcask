@@ -1,12 +1,11 @@
+const logger = require('./logger');
+
 // Configure server
 const http = require('http').createServer();
 const io = require('socket.io')(http);
 
-const logger = require('./logger');
-
 // Init storageEngine
-const config = require('./config');
-const storageEngine = config.initialize();
+const storageEngine = require('.//engine/core').initialize();
 const { validateGetArgs, validateSetArgs } = require('./validator');
 
 // Handle GET and SET operations
@@ -35,9 +34,7 @@ io.on('connection', (socket) => {
 });
 
 // Listen when storageEngine is ready
-
-// TODO: externalize PORT
-const PORT = 8081;
+const PORT = process.env.DB_SERVER_PORT || 8081;
 storageEngine.on('ready', () => {
   logger.info('StorageEngine: READY');
   http.listen(PORT, () => {
