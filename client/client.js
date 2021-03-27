@@ -23,8 +23,11 @@ class ShitCaskClient {
 
   /**
    * Connect to a shitcask server.
+   *
+   * Default timeout is 5 seconds.
+   *
    * @param {{url: string, timeout?: number}} config
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    */
   async connect({ url, timeout }) {
     return new Promise((resolve, reject) => {
@@ -45,7 +48,7 @@ class ShitCaskClient {
 
           this.socket.on('connect', () => {
             clearTimeout(this.socket._firstConnectionTimer);
-            resolve();
+            resolve(this.socket.id);
           });
         } else {
           throw new Error('Client is already connected!');
