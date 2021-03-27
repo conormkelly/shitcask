@@ -1,27 +1,29 @@
+const logger = require('../logger');
+
+const memoryIndex = require('./memory-index');
+const FileService = require('./file.service');
+const config = require('../config');
+
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
 
 const EventEmitter = require('events');
 
-const memoryIndex = require('./memory-index');
-const FileService = require('./file.service');
-const logger = require('../logger');
-
 class StorageEngine extends EventEmitter {
   /**
    *
    * @param {memoryIndex} memoryIndex
    * @param {FileService} fileService
-   * @param {{directory: fs.PathLike | string }} config
+   * @param {{DB_DATA_DIR: fs.PathLike | string }} config
    */
-  constructor(memoryIndex, fileService, { directory }) {
+  constructor(memoryIndex, fileService, { DB_DATA_DIR }) {
     super();
     // Dependencies
     this.memoryIndex = memoryIndex;
     this.fileService = fileService;
     // Config
-    this.directory = directory;
+    this.DB_DATA_DIR = DB_DATA_DIR;
 
     // Perform setup tasks
     this.initializeSegmentFile()
@@ -39,7 +41,7 @@ class StorageEngine extends EventEmitter {
   async initializeSegmentFile() {
     logger.info('Startup: Initializing segment file');
     // TODO: hardcoded name here - need to check dir for existing files
-    this.segmentFilePath = path.resolve(this.directory, '0.seg');
+    this.segmentFilePath = path.resolve(this.DB_DATA_DIR, '0.seg');
   }
 
   /**
@@ -88,12 +90,8 @@ class StorageEngine extends EventEmitter {
 }
 
 function initialize() {
-  const directory = process.env.DB_DATA_DIRECTORY || './__tests__/data';
-
-  logger.debug(`DATA_DIRECTORY: ${directory}`);
-
   const fileService = new FileService(fs, readline);
-  return new StorageEngine(memoryIndex, fileService, { directory });
+  return new StorageEngine(memoryIndex, fileService, config);
 }
 
 module.exports = {
