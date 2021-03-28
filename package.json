@@ -1,7 +1,7 @@
 {
   "name": "shitcask",
   "version": "1.0.0",
-  "description": "Basic pure Node.js key-value store DB server.",
+  "description": "Basic key-value store DB server and client.",
   "main": "main.js",
   "scripts": {
     "start": "node ./server/main.js",
@@ -18,7 +18,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "npx lint-staged",
-      "pre-push": "npm run test && exit 1"
+      "pre-push": "echo 'PLACEHOLDER - RUN TESTS HERE'"
     }
   },
   "keywords": [
