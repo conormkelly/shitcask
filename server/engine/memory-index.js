@@ -5,8 +5,9 @@ const memoryIndex = new Map();
 
 /**
  * Get the segment file offset for a key.
+ * Returns `null` if the key doesn't exist.
  * @param {any} key
- * @returns Segment file offset.
+ * @returns {number | null} Segment file offset.
  */
 function get(key) {
   return memoryIndex.get(key);
@@ -32,15 +33,16 @@ function setAll(keyOffsets) {
 }
 
 /**
- * Determines the number of keys in the index.
+ * Gets the number of keys in the index.
+ * @returns {number} Key count.
  */
 function size() {
   return memoryIndex.size;
 }
 
 /**
- * Get an iterable of [key, value] pairs in the map.
- * @returns IterableIterator<[any, number]>
+ * Get an iterable of [key, offset] pairs in the map.
+ * @returns {IterableIterator<[any, number]>}
  */
 function getEntries() {
   return memoryIndex.entries();
