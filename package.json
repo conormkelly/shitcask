@@ -17,11 +17,16 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "echo 'test'",
+      "pre-commit": "echo 'test' && npx lint-staged",
       "pre-push": "echo 'test'"
     }
   },
-  "keywords": ["db", "key-value", "store", "database"],
+  "keywords": [
+    "db",
+    "key-value",
+    "store",
+    "database"
+  ],
   "author": "Conor Kelly <conormpkelly@gmail.com>",
   "license": "MIT",
   "dependencies": {
