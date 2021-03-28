@@ -63,6 +63,3 @@ module.exports = {
   size,
   getEntries
 };
-
-const testVal = 3;
-console.log(testVal);
