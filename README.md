@@ -6,15 +6,23 @@ _I can't believe it's not [Bitcask](https://en.wikipedia.org/wiki/Bitcask)_...
 
 ### What is this?
 
-- A pure Nodejs database server and client.
-- A reverse-engineered implementation of Bitcask, purely based on the descriptions from chapter 3 of the excellent book, [Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems](https://www.amazon.co.uk/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321) by Martin Kleppmann.
+- A pure Node.js database server and client.
+- Loosely-based on Bitcask, reverse-engineered purely based on the descriptions from chapter 3 of the excellent book, [Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems](https://www.amazon.co.uk/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321) by Martin Kleppmann.
 - A work in progress.
 
 ## How do I use it?
 
 1. `npm install`
-2. Start the server via: `npm start`
-3. In a separate terminal, run: `npm run client-demo` to run the demo client queries.
+2. Set the DB_DATA_DIR environment variable.
+
+   ```sh
+   # This can be a relative or absolute path.
+   # It will be created if it doesn't exist.
+   export DB_DATA_DIR=./my_data_directory
+   ```
+
+3. Start the server via: `npm start`
+4. In a separate terminal, run: `npm run client-demo` to run the demo client queries.
 
 You should then be able to review the logs in the client and server terminals.
 
@@ -33,7 +41,6 @@ The client uses an async-await / promise-based API.
 
 Where to start...
 
-- Implement ability to define user-defined data directory.
 - Add tests.
 - Undergo performance testing.
 - Implement request queue.

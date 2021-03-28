@@ -7,7 +7,7 @@ async function main() {
 
   console.log('The socketId is', socketId, '\n');
 
-  const keysToLookup = ['123', null, 'ir; we did', undefined, 3, 'friendship'];
+  const keysToLookup = ['coolBeans', '123', undefined, 3, 'friendship'];
 
   console.log(
     `Get keys: ${JSON.stringify(keysToLookup)}, and log the time taken:\n`

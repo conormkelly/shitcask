@@ -46,7 +46,15 @@ function getEntries() {
   return memoryIndex.entries();
 }
 
+/**
+ * Clear / wipe the index entirely.
+ */
+function clear() {
+  memoryIndex.clear();
+}
+
 module.exports = {
+  clear,
   get,
   set,
   setAll,

@@ -1,33 +1,34 @@
 const config = require('./config');
 const logger = require('./logger');
 
+logger.info('Validating environment config...');
 const validateConfig = require('./validator/config');
-
-// Validate config
 const errors = validateConfig(config);
 if (errors.length > 0) {
   for (const err of errors) {
     logger.error(err.message);
   }
-  logger.error('Invalid config - exiting');
+  logger.error('Invalid environment config. Exiting.');
   process.exit(1);
 }
 
-// Log config values
-// TODO: redact secret values
+logger.info('Config values:');
 for (const key of Object.keys(config)) {
+  // TODO: redact secret values
   logger.info(`${key}: ${config[key]}`);
 }
 
 // Create server
+logger.info('Server: Creating...');
 // TODO: http / https
 const http = require('http').createServer();
 const io = require('socket.io')(http);
 
-// Init storageEngine
+logger.info('StorageEngine: Initializing...');
 const storageEngine = require('./engine/core').initialize();
 const { validateGetArgs, validateSetArgs } = require('./validator/req');
 
+logger.info('Server: Configuring listeners...');
 // Handle GET and SET operations
 io.on('connection', (socket) => {
   logger.info(`Client connected - ID: ${socket.id}`);
@@ -58,6 +59,6 @@ const { DB_SERVER_PORT } = config;
 storageEngine.on('ready', () => {
   logger.info('StorageEngine: READY');
   http.listen(DB_SERVER_PORT, () => {
-    logger.info(`Server: Listening on ${DB_SERVER_PORT}`);
+    logger.info(`Server: Listening on ${DB_SERVER_PORT}.`);
   });
 });
