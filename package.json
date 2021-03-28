@@ -1,7 +1,7 @@
 {
   "name": "shitcask",
   "version": "1.0.0",
-  "description": "",
+  "description": "Basic pure Node.js key-value store DB server.",
   "main": "main.js",
   "scripts": {
     "start": "node ./server/main.js",
@@ -21,7 +21,7 @@
       "pre-push": "echo 'test'"
     }
   },
-  "keywords": [],
+  "keywords": ["db", "key-value", "store", "database"],
   "author": "Conor Kelly <conormpkelly@gmail.com>",
   "license": "MIT",
   "dependencies": {
