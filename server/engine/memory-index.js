@@ -9,7 +9,7 @@ const memoryIndex = new Map();
  * @param {any} key
  * @returns {number | null} Segment file offset.
  */
-function get(key) {
+function get (key) {
   return memoryIndex.get(key);
 }
 
@@ -18,7 +18,7 @@ function get(key) {
  * @param {any} key
  * @param {number} offset
  */
-function set(key, offset) {
+function set (key, offset) {
   memoryIndex.set(key, offset);
 }
 
@@ -26,7 +26,7 @@ function set(key, offset) {
  * Set all the segment file offset value for the keys.
  * @param {{key: any, offset: number}[]} keyOffsets
  */
-function setAll(keyOffsets) {
+function setAll (keyOffsets) {
   keyOffsets.forEach(({ key, offset }) => {
     set(key, offset);
   });
@@ -36,7 +36,7 @@ function setAll(keyOffsets) {
  * Gets the number of keys in the index.
  * @returns {number} Key count.
  */
-function size() {
+function size () {
   return memoryIndex.size;
 }
 
@@ -44,14 +44,14 @@ function size() {
  * Get an iterable of [key, offset] pairs in the map.
  * @returns {IterableIterator<[any, number]>}
  */
-function getEntries() {
+function getEntries () {
   return memoryIndex.entries();
 }
 
 /**
  * Clear / wipe the index entirely.
  */
-function clear() {
+function clear () {
   memoryIndex.clear();
 }
 
@@ -61,5 +61,8 @@ module.exports = {
   set,
   setAll,
   size,
-  getEntries,
+  getEntries
 };
+
+const testVal = 3;
+console.log(testVal);
