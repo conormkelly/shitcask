@@ -17,8 +17,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "echo 'test' && npx lint-staged",
-      "pre-push": "echo 'test'"
+      "pre-commit": "npx lint-staged",
+      "pre-push": "npm run test && exit 1"
     }
   },
   "keywords": [
