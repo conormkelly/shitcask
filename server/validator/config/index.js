@@ -12,7 +12,7 @@ ajvErrors(ajv);
 // Compile the schema into a validator
 const validator = ajv.compile(schema);
 
-function validateConfig(config) {
+function validateConfig (config) {
   let errors = [];
 
   const isValid = validator(config);

@@ -16,7 +16,7 @@ class ShitCaskClient {
   /**
    * @param {socketIOClient} io
    */
-  constructor(io) {
+  constructor (io) {
     this.io = io;
     this.timeoutMs = 5000;
   }
@@ -29,7 +29,7 @@ class ShitCaskClient {
    * @param {{url: string, timeout?: number}} config
    * @returns {Promise<string>}
    */
-  async connect({ url, timeout }) {
+  async connect ({ url, timeout }) {
     return new Promise((resolve, reject) => {
       if (timeout !== undefined) {
         this.timeoutMs = timeout;
@@ -63,7 +63,7 @@ class ShitCaskClient {
    * Check whether the client is connected.
    * @returns {boolean}
    */
-  isConnected() {
+  isConnected () {
     return this.socket === undefined ? false : this.socket.connected;
   }
 
@@ -71,7 +71,7 @@ class ShitCaskClient {
    * Disconnect from the server.
    * @returns {Promise<void>}
    */
-  async disconnect() {
+  async disconnect () {
     return new Promise((resolve, reject) => {
       try {
         if (this.isConnected()) {
@@ -93,7 +93,7 @@ class ShitCaskClient {
    * @param {*} key
    * @returns {{success: true, value: any} | {success: false, message: string}}
    */
-  async get(key) {
+  async get (key) {
     return new Promise((resolve, reject) => {
       try {
         this.socket.emit('get', { key }, (response) => {
@@ -116,7 +116,7 @@ class ShitCaskClient {
    * @returns {{success: true } | {success: false, message: string}}
    *
    */
-  async set(key, value) {
+  async set (key, value) {
     return new Promise((resolve, reject) => {
       try {
         this.socket.emit('set', { key, value }, (response) => {
@@ -137,5 +137,5 @@ const client = new ShitCaskClient(socketIOClient);
 
 module.exports = {
   default: client,
-  ShitCaskClient,
+  ShitCaskClient
 };

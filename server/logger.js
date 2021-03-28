@@ -8,9 +8,9 @@ const logger = createLogger({
     new transports.Console({
       format: printf(({ level, message, timestamp }) => {
         return `${timestamp} - ${level}: ${message}`;
-      }),
-    }),
-  ],
+      })
+    })
+  ]
 });
 
 module.exports = logger;

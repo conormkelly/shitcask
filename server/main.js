@@ -32,24 +32,24 @@ logger.info('Server: Configuring listeners...');
 // Handle GET and SET operations
 io.on('connection', (socket) => {
   logger.info(`Client connected - ID: ${socket.id}`);
-  socket.on('set', async (req, callback) => {
+  socket.on('set', async (req, res) => {
     try {
       validateSetArgs(req);
       await storageEngine.set(req.key, req.value);
-      callback({ success: true });
+      res({ success: true });
     } catch (err) {
       logger.warn(`SetError (${socket.id}) : ${err.message}`);
-      callback({ success: false, message: err.message });
+      res({ success: false, message: err.message });
     }
   });
-  socket.on('get', async (req, callback) => {
+  socket.on('get', async (req, res) => {
     try {
       validateGetArgs(req);
       const value = await storageEngine.get(req.key);
-      callback({ success: true, value: value });
+      res({ success: true, value: value });
     } catch (err) {
       logger.warn(`GetError (${socket.id}) : ${err.message}`);
-      callback({ success: false, message: err.message });
+      res({ success: false, message: err.message });
     }
   });
 });

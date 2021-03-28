@@ -9,11 +9,11 @@ module.exports = {
     type: 'object',
     properties: {
       key: {
-        description: 'The key to set.',
+        description: 'The key to set.'
       },
       value: {
-        description: 'The value to set.',
-      },
+        description: 'The value to set.'
+      }
     },
     required: ['key', 'value'],
     additionalProperties: false,
@@ -21,8 +21,8 @@ module.exports = {
       required: "'key' and 'value' are required",
       additionalProperties: "should only provide 'key' and 'value'",
       type: "should provide an object containing 'key' and 'value'",
-      _: "should provide an object containing only 'key' and 'value'",
-    },
+      _: "should provide an object containing only 'key' and 'value'"
+    }
   },
   get: {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -32,8 +32,8 @@ module.exports = {
     type: 'object',
     properties: {
       key: {
-        description: 'The key to lookup a value for.',
-      },
+        description: 'The key to lookup a value for.'
+      }
     },
     required: ['key'],
     additionalProperties: false,
@@ -41,7 +41,7 @@ module.exports = {
       required: "'key' is required",
       additionalProperties: "should only provide 'key'",
       type: "should provide an object containing 'key'",
-      _: "should provide an object containing only 'key'",
-    },
-  },
+      _: "should provide an object containing only 'key'"
+    }
+  }
 };

@@ -17,7 +17,7 @@ class StorageEngine extends EventEmitter {
    * @param {FileService} fileService
    * @param {{DB_DATA_DIR: fs.PathLike | string }} config
    */
-  constructor(memoryIndex, fileService, { DB_DATA_DIR }) {
+  constructor (memoryIndex, fileService, { DB_DATA_DIR }) {
     super();
     // Dependencies
     this.memoryIndex = memoryIndex;
@@ -42,7 +42,7 @@ class StorageEngine extends EventEmitter {
    * Ensures that DB_DATA_DIR exists, by creating it if it does not.
    * @returns {Promise<void>}
    */
-  async ensureDataDir() {
+  async ensureDataDir () {
     logger.info(`DB_DATA_DIR: Ensuring "${this.DB_DATA_DIR}" exists.`);
     const dataDirExists = await this.fileService.exists(this.DB_DATA_DIR);
 
@@ -63,19 +63,19 @@ class StorageEngine extends EventEmitter {
    * Setup task.
    * Selects the initial .seg file, creating it if none exist in DB_DATA_DIR.
    */
-  async selectInitialSegmentFile() {
+  async selectInitialSegmentFile () {
     const segmentFiles = await this.listSegmentFiles();
 
     // Default to 0.seg
     let segmentFileName = '0.seg';
-    if (segmentFiles.length == 0) {
+    if (segmentFiles.length === 0) {
       logger.info(
         'Segment file: No existing files found - attempting to create...'
       );
       await this.createSegmentFile(segmentFileName);
       logger.info('Segment file: Successfully created.');
     } else {
-      if (segmentFiles.length == 1) {
+      if (segmentFiles.length === 1) {
         [segmentFileName] = segmentFiles;
       } else {
         try {
@@ -109,7 +109,7 @@ class StorageEngine extends EventEmitter {
    * Lists all the .seg files within the DB_DATA_DIR.
    * @returns {Promise<String[]>} Array of .seg file names.
    */
-  async listSegmentFiles() {
+  async listSegmentFiles () {
     logger.info('Segment file: Checking DB_DATA_DIR...');
 
     let directoryFiles = [];
@@ -133,13 +133,13 @@ class StorageEngine extends EventEmitter {
    * @param {string} filename
    * @returns {Promise<void>}
    */
-  async createSegmentFile(filename) {
+  async createSegmentFile (filename) {
     try {
       const filePath = path.resolve(this.DB_DATA_DIR, filename);
       await this.fileService.createFile(filePath, '');
     } catch (err) {
       throw new Error(
-        `Error creating segment file (${filePath}): ${err.message}`
+        `Error creating segment file "${filename}": ${err.message}`
       );
     }
   }
@@ -147,7 +147,7 @@ class StorageEngine extends EventEmitter {
   /**
    * Builds the index of offsets based on the segment file.
    */
-  async buildIndex() {
+  async buildIndex () {
     logger.info('Index: Starting build...');
 
     const keyOffsetArray = await this.fileService.getSegmentLineOffsets(
@@ -170,7 +170,7 @@ class StorageEngine extends EventEmitter {
    * @param {any} key
    * @param {any} value
    */
-  async set(key, value) {
+  async set (key, value) {
     const offset = await this.fileService.appendToFile(
       this.segmentFilePath,
       `${JSON.stringify({ k: key, v: value })}\n`
@@ -183,7 +183,7 @@ class StorageEngine extends EventEmitter {
    * @param {any} key
    * @returns
    */
-  async get(key) {
+  async get (key) {
     const offset = this.memoryIndex.get(key);
     const value =
       offset !== undefined
@@ -196,12 +196,12 @@ class StorageEngine extends EventEmitter {
   }
 }
 
-function initialize() {
+function initialize () {
   const fileService = new FileService(fs, readline);
   return new StorageEngine(memoryIndex, fileService, config);
 }
 
 module.exports = {
   initialize,
-  StorageEngine,
+  StorageEngine
 };
