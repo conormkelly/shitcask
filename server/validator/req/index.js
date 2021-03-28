@@ -20,7 +20,7 @@ const setValidator = ajv.compile(schemas.set);
  * @returns {Function}
  */
 const createValidator = (validator) => {
-  return function validate(req) {
+  return function validate (req) {
     if (!validator(req)) {
       const [error] = validator.errors;
       throw new Error(error.message);
@@ -30,5 +30,5 @@ const createValidator = (validator) => {
 
 module.exports = {
   validateGetArgs: createValidator(getValidator),
-  validateSetArgs: createValidator(setValidator),
+  validateSetArgs: createValidator(setValidator)
 };

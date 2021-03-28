@@ -8,16 +8,16 @@ module.exports = {
     DB_DATA_DIR: {
       description: 'Directory to store .seg files in',
       type: 'string',
-      minLength: 1,
+      minLength: 1
     },
     DB_SERVER_PORT: {
-      description: 'The port for the server to listen on',
-    },
+      description: 'The port for the server to listen on'
+    }
   },
   errorMessage: {
     required: {
-      DB_DATA_DIR: "Environment variable 'DB_DATA_DIR' is required",
-    },
+      DB_DATA_DIR: "Environment variable 'DB_DATA_DIR' is required"
+    }
   },
-  required: ['DB_DATA_DIR'],
+  required: ['DB_DATA_DIR']
 };

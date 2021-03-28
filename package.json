@@ -7,7 +7,8 @@
     "start": "node ./server/main.js",
     "local": "nodemon ./server/main.js",
     "test": "jest --collect-coverage",
-    "format": "prettier-standard --format",
+    "format:check": "prettier-standard --check",
+    "lint:all": "prettier-standard --lint",
     "client-demo": "node ./client/demo.js"
   },
   "lint-staged": {

@@ -1,8 +1,8 @@
 const shitcaskClient = require('./client').default;
 
-async function main() {
+async function main () {
   const socketId = await shitcaskClient.connect({
-    url: 'http://localhost:8081/',
+    url: 'http://localhost:8081/'
   });
 
   console.log('The socketId is', socketId, '\n');
