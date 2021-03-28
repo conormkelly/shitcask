@@ -46,5 +46,3 @@ Where to start...
 - Implement request queue.
 - Implement compaction strategy.
 - Add auth.
-
-
