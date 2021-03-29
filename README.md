@@ -37,6 +37,10 @@ The client and server communicate using [socket.io](https://www.npmjs.com/packag
 
 The client uses an async-await / promise-based API.
 
+### Limitations
+
+Key must be a string or integer.
+
 ## TODO
 
 Where to start...

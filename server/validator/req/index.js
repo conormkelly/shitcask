@@ -3,11 +3,11 @@ const schemas = require('./schemas');
 
 // Import and instantiate Ajv
 const Ajv = require('ajv').default;
-const ajv = new Ajv({ allErrors: true });
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 
 // Add ajv-errors
 const ajvErrors = require('ajv-errors');
-ajvErrors(ajv, { singleError: true });
+ajvErrors(ajv);
 
 // Compile the schemas into validators
 const getValidator = ajv.compile(schemas.get);

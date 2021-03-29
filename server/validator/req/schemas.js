@@ -9,7 +9,8 @@ module.exports = {
     type: 'object',
     properties: {
       key: {
-        description: 'The key to set.'
+        description: 'The key to set.',
+        type: ['integer', 'string']
       },
       value: {
         description: 'The value to set.'
@@ -18,6 +19,9 @@ module.exports = {
     required: ['key', 'value'],
     additionalProperties: false,
     errorMessage: {
+      properties: {
+        key: "'key' should be of type: { string | integer }"
+      },
       required: "'key' and 'value' are required",
       additionalProperties: "should only provide 'key' and 'value'",
       type: "should provide an object containing 'key' and 'value'",
@@ -32,12 +36,16 @@ module.exports = {
     type: 'object',
     properties: {
       key: {
-        description: 'The key to lookup a value for.'
+        description: 'The key to lookup a value for.',
+        type: ['integer', 'string']
       }
     },
     required: ['key'],
     additionalProperties: false,
     errorMessage: {
+      properties: {
+        key: "'key' should be of type: { string | integer }"
+      },
       required: "'key' is required",
       additionalProperties: "should only provide 'key'",
       type: "should provide an object containing 'key'",
