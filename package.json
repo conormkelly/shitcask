@@ -19,7 +19,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "npx lint-staged",
-      "pre-push": "echo 'PLACEHOLDER - RUN TESTS HERE'"
+      "pre-push": "npm test"
     }
   },
   "keywords": [
