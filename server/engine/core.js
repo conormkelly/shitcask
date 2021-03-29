@@ -166,7 +166,7 @@ class StorageEngine extends EventEmitter {
   }
 
   /**
-   * Persist the key.
+   * Persist a key-value pair.
    * @param {any} key
    * @param {any} value
    */
@@ -179,20 +179,23 @@ class StorageEngine extends EventEmitter {
   }
 
   /**
-   * Retrieve the key.
+   * Retrieve the value for a key.
    * @param {any} key
-   * @returns
+   * @returns {any | null}
    */
   async get (key) {
     const offset = this.memoryIndex.get(key);
-    const value =
-      offset !== undefined
-        ? await this.fileService.readLineFromOffset(
-            this.segmentFilePath,
-            offset
-          )
-        : null;
-    return value ? JSON.parse(value).v : value;
+
+    if (offset === undefined) {
+      return null;
+    } else {
+      const line = await this.fileService.readLineFromOffset(
+        this.segmentFilePath,
+        offset
+      );
+      // Records are currently stored as {k, v} plaintext JSON
+      return JSON.parse(line).v;
+    }
   }
 }
 

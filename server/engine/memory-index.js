@@ -5,9 +5,10 @@ const memoryIndex = new Map();
 
 /**
  * Get the segment file offset for a key.
- * Returns `null` if the key doesn't exist.
+ *
+ * Returns `undefined` if the key doesn't exist.
  * @param {any} key
- * @returns {number | null} Segment file offset.
+ * @returns {number | undefined} Segment file offset.
  */
 function get (key) {
   return memoryIndex.get(key);

@@ -69,7 +69,7 @@ class FileService {
    * Read the line at a given offset within a file.
    * @param {fs.PathLike} filePath File path.
    * @param {number} offset Position within the file.
-   * @returns {Promise<string>}
+   * @returns {Promise<string>} JSON string.
    */
   async readLineFromOffset (filePath, offset) {
     return new Promise((resolve, reject) => {
