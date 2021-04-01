@@ -3,8 +3,5 @@ node_modules/
 # Testing
 coverage/
 
-# Test data
-/__tests__/data/
-
 # Development
 .env

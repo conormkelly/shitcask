@@ -1,6 +1,8 @@
-// Dependencies: imported here to define the types in JSdoc,
-// but they are provided via constructor injection.
-const fs = require('fs');
+// fs dependency is only imported here to add types to the JSdocs.
+// At runtime, fs is provided to the FileService class via constructor injection.
+// This allows us to substitute it for 'memfs' in the tests.
+
+const fs = require('fs'); // eslint-disable-line no-unused-vars
 
 // Constants
 const UINT32_BYTE_LEN = Uint32Array.BYTES_PER_ELEMENT;
@@ -21,7 +23,7 @@ class FileService {
    */
   async exists (path) {
     try {
-      await fs.promises.access(path, fs.constants.F_OK);
+      await this.fs.promises.access(path, this.fs.constants.F_OK);
       return true;
     } catch (err) {
       return false;
@@ -43,7 +45,7 @@ class FileService {
    * @returns {Promise<string[]}
    */
   async listDirectoryFiles (directoryPath) {
-    return fs.promises.readdir(directoryPath);
+    return this.fs.promises.readdir(directoryPath);
   }
 
   /**
@@ -52,7 +54,7 @@ class FileService {
    * @returns {Promise<void>}
    */
   async createDirectory (directoryPath) {
-    return fs.promises.mkdir(directoryPath, { recursive: true });
+    return this.fs.promises.mkdir(directoryPath, { recursive: true });
   }
 
   /**
@@ -62,7 +64,7 @@ class FileService {
    * @returns {Promise<void>}
    */
   async createFile (filePath, data) {
-    return fs.promises.writeFile(filePath, data);
+    return this.fs.promises.writeFile(filePath, data);
   }
 
   /**
@@ -76,7 +78,7 @@ class FileService {
       let fileBuffer = null;
       let recordLength = null;
 
-      const readStream = fs
+      const readStream = this.fs
         .createReadStream(filePath, { start: offset })
         .on('error', (err) => {
           reject(err);
@@ -160,7 +162,8 @@ class FileService {
       let numBytesParsed = 0;
       let fileBuffer = null;
 
-      fs.createReadStream(filePath, { start: 0 })
+      this.fs
+        .createReadStream(filePath, { start: 0 })
         .on('error', (err) => {
           reject(err);
         })
