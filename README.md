@@ -58,14 +58,29 @@ The client uses an async-await / promise-based API.
 
 ### Limitations
 
-Key must be a string (for now).
+- Key must be a string (for now).
+
+## Tests
+
+- Run unit tests
+
+  ```sh
+  npm test
+  ```
+
+- Browse test coverage
+
+  ```sh
+  npm run coverage
+  ```
 
 ## TODO
 
 Where to start...
 
-- Add tests.
+- Increase test coverage.
 - Undergo performance testing.
-- Implement request queue.
+- Implement request queue (if needed).
 - Implement compaction strategy.
 - Add auth.
+- Add more config options.

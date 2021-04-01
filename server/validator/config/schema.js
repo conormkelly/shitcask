@@ -11,12 +11,18 @@ module.exports = {
       minLength: 1
     },
     DB_SERVER_PORT: {
-      description: 'The port for the server to listen on'
+      description: 'The port for the server to listen on',
+      type: 'string',
+      pattern: '^\\d+$'
     }
   },
   errorMessage: {
     required: {
       DB_DATA_DIR: "Environment variable 'DB_DATA_DIR' is required"
+    },
+    properties: {
+      DB_DATA_DIR: 'DB_DATA_DIR must be a valid directory path',
+      DB_SERVER_PORT: 'DB_SERVER_PORT must be numeric only'
     }
   },
   required: ['DB_DATA_DIR']
