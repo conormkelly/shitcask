@@ -7,7 +7,8 @@ _I can't believe it's not [Bitcask](https://en.wikipedia.org/wiki/Bitcask)_...
 ### What is this?
 
 - A pure Node.js database server and client.
-- Loosely-based on Bitcask, reverse-engineered purely based on the descriptions from chapter 3 of the excellent book, [Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems](https://www.amazon.co.uk/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321) by Martin Kleppmann.
+- Loosely-based on Bitcask, reverse-engineered purely based on the descriptions from chapter 3 of the excellent book;  
+  [Designing Data-Intensive Applications: The Big Ideas Behind Reliable, Scalable, and Maintainable Systems](https://www.amazon.co.uk/Designing-Data-Intensive-Applications-Reliable-Maintainable/dp/1449373321) by Martin Kleppmann.
 - A work in progress.
 
 ## How do I use it?
@@ -30,8 +31,26 @@ _The client will be split into a separate repo in future._
 
 ## How does it work?
 
-The server maintains a hashmap in memory containing `offset` values,
+The server maintains a hashmap in memory containing `offset` values,  
 which are basically pointers to the location of the corresponding value within a `segment` file that has been written to disk.
+
+Every write ("set" command) that takes place is appended to the segment file.
+
+Values are written to disk as a buffer that contains two parts:
+
+1. The `recordLength` is stored as a 32-bit integer (`UInt32LE`).
+2. This is immediately followed by a `utf8`-encoded JSON string of the record (key-value pair) itself.
+
+The offsets stored by the memory map point to the start of the `recordLength`,  
+so when reading a value, we can check this value then buffer through the file until we have read the whole record.
+
+Each additional write updates the memory map to point to the latest value for a particular key.
+
+This means that keys are duplicated within the file, so a compaction process must occur occasionally to clean up the filesystem.
+
+**This is not implemented yet!**
+
+### Client
 
 The client and server communicate using [socket.io](https://www.npmjs.com/package/socket.io).
 
@@ -39,7 +58,7 @@ The client uses an async-await / promise-based API.
 
 ### Limitations
 
-Key must be a string or integer.
+Key must be a string (for now).
 
 ## TODO
 
