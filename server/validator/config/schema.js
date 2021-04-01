@@ -13,7 +13,8 @@ module.exports = {
     DB_SERVER_PORT: {
       description: 'The port for the server to listen on',
       type: 'integer',
-      minimum: 80
+      minimum: 1,
+      maximum: 65353
     },
     DB_USE_MEMFS: {
       description: 'Whether to operate on an in-memory filesystem',
@@ -34,7 +35,7 @@ module.exports = {
     },
     properties: {
       DB_DATA_DIR: 'DB_DATA_DIR: must be a valid directory path',
-      DB_SERVER_PORT: 'DB_SERVER_PORT: must be a number',
+      DB_SERVER_PORT: 'DB_SERVER_PORT: must be a number between 1 - 65353',
       DB_USE_MEMFS: "DB_USE_MEMFS: must be 'true' or 'false'",
       READ_BUFFER_BYTE_SIZE:
         'READ_BUFFER_BYTE_SIZE: must be an integer >= 16 that is a multiple of 4'
