@@ -68,7 +68,7 @@ class FileService {
   }
 
   /**
-   * Read the line at a given offset within a file.
+   * Read the record at a given offset within a file.
    * @param {fs.PathLike} filePath File path.
    * @param {number} offset Position within the file.
    * @returns {Promise<string>} JSON string.
@@ -86,18 +86,17 @@ class FileService {
         .on('data', (chunk) => {
           // If this is the first read, chunk IS the buffer, otherwise concat it to exiting buffer
           fileBuffer = !fileBuffer ? chunk : Buffer.concat([fileBuffer, chunk]);
-          // recordLength only needs to be calculated once.
-          // It can never be zero because there's a minimum storage overhead.
-          recordLength = !recordLength
-            ? fileBuffer.readUInt32LE(0)
-            : recordLength;
+          // recordLength only needs to be calculated once
+          recordLength = recordLength ?? fileBuffer.readUInt32LE(0);
 
-          // Do we have all the data? 4 is the amount of bytes per UInt32.
-          if (fileBuffer.byteLength >= recordLength + UINT32_BYTE_LEN) {
+          // Do we have all the data?
+          if (fileBuffer.byteLength >= UINT32_BYTE_LEN + recordLength) {
             readStream.close();
+
+            // Buffer starts with recordLength as UInt32
             const rawRecord = fileBuffer.slice(
               UINT32_BYTE_LEN,
-              recordLength + UINT32_BYTE_LEN
+              UINT32_BYTE_LEN + recordLength
             );
             resolve(rawRecord.toString('utf8'));
           }
