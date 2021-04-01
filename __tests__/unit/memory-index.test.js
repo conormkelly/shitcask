@@ -1,5 +1,5 @@
 // Module under test
-const memoryIndex = require('../../server/engine/memory-index');
+const memoryIndex = require('../../server/engine/memory-index').default;
 
 describe('Memory Index [UNIT]', () => {
   test('should initially be empty', () => {
@@ -23,15 +23,14 @@ describe('Memory Index [UNIT]', () => {
     expect(memoryIndex.get('ABC')).toEqual(234);
   });
 
-  test('can set multiple values with setAll', () => {
+  test('can replace index with load', () => {
     // Arrange
-    const keyOffsets = [
-      { key: 'key0', offset: 0 },
-      { key: 'key1', offset: 1 }
-    ];
+    const fileOffsets = new Map();
+    fileOffsets.set('key0', 0);
+    fileOffsets.set('key1', 1);
 
     // Act
-    memoryIndex.setAll(keyOffsets);
+    memoryIndex.load(fileOffsets);
 
     // Assert
     expect(memoryIndex.get('key0')).toEqual(0);
@@ -58,12 +57,11 @@ describe('Memory Index [UNIT]', () => {
   test('can iterate over entries', () => {
     // Arrange:
     // Clear index and set multiple values
-    memoryIndex.clear();
-    const keyOffsets = [
-      { key: 'key0', offset: 0 },
-      { key: 'key1', offset: 1 }
-    ];
-    memoryIndex.setAll(keyOffsets);
+    const fileOffsets = new Map();
+    fileOffsets.set('key0', 0);
+    fileOffsets.set('key1', 1);
+
+    memoryIndex.load(fileOffsets);
 
     // Act
     const entries = memoryIndex.getEntries();

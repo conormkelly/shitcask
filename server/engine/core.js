@@ -1,11 +1,10 @@
 const logger = require('../logger');
 
-const memoryIndex = require('./memory-index');
+const memoryIndex = require('./memory-index').default;
 const FileService = require('./file.service');
 const config = require('../config');
 
 const fs = require('fs');
-const readline = require('readline');
 const path = require('path');
 
 const EventEmitter = require('events');
@@ -150,17 +149,10 @@ class StorageEngine extends EventEmitter {
   async buildIndex () {
     logger.info('Index: Starting build...');
 
-    const keyOffsetArray = await this.fileService.getSegmentLineOffsets(
+    const keyOffsetMap = await this.fileService.readFileOffsets(
       this.segmentFilePath
     );
-
-    // TODO: even though this only operates on a single .seg file now,
-    // we might be rebuilding this on the fly later,
-    // if we swap over files after compaction,
-    // So keeping this "clear" command here for visibility
-    this.memoryIndex.clear();
-
-    this.memoryIndex.setAll(keyOffsetArray);
+    this.memoryIndex.load(keyOffsetMap);
 
     logger.info('Index: OK');
   }
@@ -171,10 +163,10 @@ class StorageEngine extends EventEmitter {
    * @param {any} value
    */
   async set (key, value) {
-    const offset = await this.fileService.appendToFile(
-      this.segmentFilePath,
-      `${JSON.stringify({ k: key, v: value })}\n`
-    );
+    const offset = await this.fileService.appendToFile(this.segmentFilePath, {
+      key,
+      value
+    });
     this.memoryIndex.set(key, offset);
   }
 
@@ -189,7 +181,7 @@ class StorageEngine extends EventEmitter {
     if (offset === undefined) {
       return null;
     } else {
-      const line = await this.fileService.readLineFromOffset(
+      const line = await this.fileService.readRecordAtOffset(
         this.segmentFilePath,
         offset
       );
@@ -200,7 +192,7 @@ class StorageEngine extends EventEmitter {
 }
 
 function initialize () {
-  const fileService = new FileService(fs, readline);
+  const fileService = new FileService(fs);
   return new StorageEngine(memoryIndex, fileService, config);
 }
 

@@ -1,12 +1,13 @@
 {
   "name": "shitcask",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Basic key-value store DB server and client.",
   "main": "main.js",
   "scripts": {
     "start": "node ./server/main.js",
     "local": "nodemon -r ./dotenv/config ./server/main.js",
     "test": "jest --collect-coverage",
+    "coverage": "jest --collect-coverage && start ./coverage/lcov-report/index.html",
     "format:check": "prettier-standard --check",
     "lint:all": "prettier-standard --lint",
     "client-demo": "node ./client/demo.js"

@@ -1,66 +1,73 @@
-// A key-value map where:
-//   key == key
-//   value == the offset in the segment file
-const memoryIndex = new Map();
-
 /**
- * Get the segment file offset for a key.
- *
- * Returns `undefined` if the key doesn't exist.
- * @param {any} key
- * @returns {number | undefined} Segment file offset.
+ * A key-value map where:
+ * ```json
+ * {
+ *   "key": "string",
+ *   "value": "number" // Offset in segment file
+ * }
+ * ```
  */
-function get (key) {
-  return memoryIndex.get(key);
-}
+class MemoryIndex {
+  _memIndex;
 
-/**
- * Store the segment file offset value for the key.
- * @param {any} key
- * @param {number} offset
- */
-function set (key, offset) {
-  memoryIndex.set(key, offset);
-}
+  constructor () {
+    this._memIndex = new Map();
+  }
 
-/**
- * Set all the segment file offset value for the keys.
- * @param {{key: any, offset: number}[]} keyOffsets
- */
-function setAll (keyOffsets) {
-  keyOffsets.forEach(({ key, offset }) => {
-    set(key, offset);
-  });
-}
+  /**
+   * Get the segment file offset for a key.
+   *
+   * Returns `undefined` if the key doesn't exist.
+   * @param {any} key
+   * @returns {number | undefined} Segment file offset.
+   */
+  get (key) {
+    return this._memIndex.get(key);
+  }
 
-/**
- * Gets the number of keys in the index.
- * @returns {number} Key count.
- */
-function size () {
-  return memoryIndex.size;
-}
+  /**
+   * Store the segment file offset value for the key.
+   * @param {any} key
+   * @param {number} offset
+   */
+  set (key, offset) {
+    this._memIndex.set(key, offset);
+  }
 
-/**
- * Get an iterable of [key, offset] pairs in the map.
- * @returns {IterableIterator<[any, number]>}
- */
-function getEntries () {
-  return memoryIndex.entries();
-}
+  /**
+   * Replace the current memory index.
+   * Used on startup.
+   * @param {Map<string,number>} fileOffsetMap
+   */
+  load (fileOffsetMap) {
+    this._memIndex = fileOffsetMap;
+  }
 
-/**
- * Clear / wipe the index entirely.
- */
-function clear () {
-  memoryIndex.clear();
+  /**
+   * Gets the number of keys in the index.
+   * @returns {number} Key count.
+   */
+  size () {
+    return this._memIndex.size;
+  }
+
+  /**
+   * Get an iterable of [key, offset] pairs in the map.
+   * @returns {IterableIterator<[any, number]>}
+   */
+  getEntries () {
+    return this._memIndex.entries();
+  }
+
+  /**
+   * Clear / wipe the index entirely.
+   */
+  clear () {
+    this._memIndex.clear();
+  }
 }
 
 module.exports = {
-  clear,
-  get,
-  set,
-  setAll,
-  size,
-  getEntries
+  default: new MemoryIndex(),
+  MemoryIndex
 };
