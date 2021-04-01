@@ -3,7 +3,7 @@ const schemas = require('./schemas');
 
 // Import and instantiate Ajv
 const Ajv = require('ajv').default;
-const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
+const ajv = new Ajv({ allErrors: true });
 
 // Add ajv-errors
 const ajvErrors = require('ajv-errors');

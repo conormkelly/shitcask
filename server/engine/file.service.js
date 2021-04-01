@@ -1,17 +1,17 @@
 // Dependencies: imported here to define the types in JSdoc,
 // but they are provided via constructor injection.
 const fs = require('fs');
-const readline = require('readline');
+
+// Constants
+const UINT32_BYTE_LEN = Uint32Array.BYTES_PER_ELEMENT;
 
 class FileService {
   /**
    * @param {fs} fs
-   * @param {readline} readline
    */
-  constructor (fs, readline) {
+  constructor (fs) {
     // Dependencies
     this.fs = fs;
-    this.readline = readline;
   }
 
   /**
@@ -71,34 +71,35 @@ class FileService {
    * @param {number} offset Position within the file.
    * @returns {Promise<string>} JSON string.
    */
-  async readLineFromOffset (filePath, offset) {
+  async readRecordAtOffset (filePath, offset) {
     return new Promise((resolve, reject) => {
-      try {
-        const rs = this.fs
-          .createReadStream(filePath, {
-            start: offset
-          })
-          .on('error', (err) => {
-            reject(err);
-          });
+      let fileBuffer = null;
+      let recordLength = null;
 
-        const rl = readline
-          .createInterface({
-            input: rs,
-            console: false
-          })
-          .on('error', (err) => {
-            reject(err);
-          });
+      const readStream = fs
+        .createReadStream(filePath, { start: offset })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('data', (chunk) => {
+          // If this is the first read, chunk IS the buffer, otherwise concat it to exiting buffer
+          fileBuffer = !fileBuffer ? chunk : Buffer.concat([fileBuffer, chunk]);
+          // recordLength only needs to be calculated once.
+          // It can never be zero because there's a minimum storage overhead.
+          recordLength = !recordLength
+            ? fileBuffer.readUInt32LE(0)
+            : recordLength;
 
-        rl.on('line', (line) => {
-          rs.close();
-          rl.close();
-          resolve(line);
+          // Do we have all the data? 4 is the amount of bytes per UInt32.
+          if (fileBuffer.byteLength >= recordLength + UINT32_BYTE_LEN) {
+            readStream.close();
+            const rawRecord = fileBuffer.slice(
+              UINT32_BYTE_LEN,
+              recordLength + UINT32_BYTE_LEN
+            );
+            resolve(rawRecord.toString('utf8'));
+          }
         });
-      } catch (err) {
-        reject(err);
-      }
     });
   }
 
@@ -106,11 +107,20 @@ class FileService {
    * Append data to an existing file.
    * Returns the offset (used by the memoryIndex).
    * @param {fs.PathLike} filePath
-   * @param {any} data
-   * @returns {Promise<number>} Start offset of where the data was written.
+   * @param {{key: string, value: any}} keyValuePair
+   * @returns {Promise<number>} Offset of where the data was written.
    */
-  async appendToFile (filePath, data) {
+  async appendToFile (filePath, { key, value }) {
     return new Promise((resolve, reject) => {
+      // Create a buffer to write record
+      const data = JSON.stringify({ k: key, v: value });
+      const byteCount = Buffer.byteLength(data);
+      const buffer = Buffer.alloc(UINT32_BYTE_LEN + byteCount);
+      // First 4 bytes is for record length
+      buffer.writeInt32LE(byteCount, 0);
+      // Rest of the buffer is a utf8 string
+      buffer.write(data, UINT32_BYTE_LEN, 'utf8');
+
       this.stat(filePath)
         .then((stats) => {
           const offset = stats.size;
@@ -118,7 +128,6 @@ class FileService {
           const ws = this.fs
             .createWriteStream(filePath, {
               start: offset,
-              // Change to a+ when I implement fix for above
               flags: 'a'
             })
             .on('error', (err) => {
@@ -126,7 +135,7 @@ class FileService {
             });
 
           ws.cork();
-          ws.write(data);
+          ws.write(buffer);
           process.nextTick(() => {
             ws.uncork();
             resolve(offset);
@@ -139,38 +148,58 @@ class FileService {
   }
 
   /**
-   * Finds the key and offset for each line in a segment file.
+   * Finds the key and offset for each record in a segment file.
    * @param {fs.PathLike} filePath
-   * @returns {{key: any, offset: number}[]} Seg file line offsets.
+   * @returns {Map<string, number} Seg file line offsets.
    */
-  async getSegmentLineOffsets (filePath) {
-    const rs = this.fs.createReadStream(filePath).on('error', (err) => {
-      throw err;
+  async readFileOffsets (filePath) {
+    return new Promise((resolve, reject) => {
+      const fileOffsets = new Map();
+
+      // To calculate absolute position (for offset) within the file
+      let numBytesParsed = 0;
+      let fileBuffer = null;
+
+      fs.createReadStream(filePath, { start: 0 })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('data', (chunk) => {
+          // Initialize or concat the fileBuffer
+          fileBuffer = !fileBuffer ? chunk : Buffer.concat([fileBuffer, chunk]);
+          let relativePosition = 0;
+
+          // First 4 bytes of buff is always an int32 that tells how long the record is
+          let recordLength = fileBuffer.readUInt32LE(relativePosition);
+
+          // While we have records in the buffer
+          while (
+            fileBuffer.byteLength >=
+            relativePosition + recordLength + UINT32_BYTE_LEN
+          ) {
+            // Parse the record and set the offset
+            recordLength = fileBuffer.readUInt32LE(relativePosition);
+            const recordData = fileBuffer.slice(
+              relativePosition + UINT32_BYTE_LEN,
+              relativePosition + recordLength + UINT32_BYTE_LEN
+            );
+            const key = JSON.parse(recordData.toString('utf8')).k;
+            fileOffsets.set(key, relativePosition + numBytesParsed);
+
+            // Loop will break if buffer exhausted
+            relativePosition += recordLength + UINT32_BYTE_LEN;
+          }
+          // If buffer exhausted - relativePosition contains the recordLength for next record
+          // Buffer is concatenated on next "data" event so we
+          // dont have to worry about record size, they can span across buffers
+          fileBuffer = fileBuffer.slice(relativePosition);
+          // Tracks total number of bytes to determine absolute offsets within the file
+          numBytesParsed += relativePosition;
+        })
+        .on('end', () => {
+          resolve(fileOffsets);
+        });
     });
-
-    const rl = this.readline
-      .createInterface({
-        input: rs,
-        console: false
-      })
-      .on('error', (err) => {
-        throw err;
-      });
-
-    const segmentOffsets = [];
-
-    const position = { current: 0, next: 0 };
-    for await (const line of rl) {
-      position.next = position.current + Buffer.byteLength(`${line}\n`, 'utf8');
-      const parsedLine = JSON.parse(line);
-      segmentOffsets.push({ key: parsedLine.k, offset: position.current });
-      position.current = position.next;
-    }
-
-    rl.close();
-    rs.close();
-
-    return segmentOffsets;
   }
 }
 

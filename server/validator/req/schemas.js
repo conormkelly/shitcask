@@ -10,7 +10,7 @@ module.exports = {
     properties: {
       key: {
         description: 'The key to set.',
-        type: ['integer', 'string']
+        type: 'string'
       },
       value: {
         description: 'The value to set.'
@@ -20,7 +20,7 @@ module.exports = {
     additionalProperties: false,
     errorMessage: {
       properties: {
-        key: "'key' should be of type: { string | integer }"
+        key: "'key' should be of type 'string'"
       },
       required: "'key' and 'value' are required",
       additionalProperties: "should only provide 'key' and 'value'",
@@ -37,14 +37,14 @@ module.exports = {
     properties: {
       key: {
         description: 'The key to lookup a value for.',
-        type: ['integer', 'string']
+        type: 'string'
       }
     },
     required: ['key'],
     additionalProperties: false,
     errorMessage: {
       properties: {
-        key: "'key' should be of type: { string | integer }"
+        key: "'key' should be of type 'string'"
       },
       required: "'key' is required",
       additionalProperties: "should only provide 'key'",
