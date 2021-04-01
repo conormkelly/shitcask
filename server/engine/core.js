@@ -4,6 +4,7 @@ const memoryIndex = require('./memory-index').default;
 const FileService = require('./file.service');
 const config = require('../config');
 
+const memfs = require('memfs');
 const fs = require('fs');
 const path = require('path');
 
@@ -192,7 +193,8 @@ class StorageEngine extends EventEmitter {
 }
 
 function initialize () {
-  const fileService = new FileService(fs);
+  const fsImplementation = config.DB_USE_MEMFS ? memfs : fs;
+  const fileService = new FileService(fsImplementation, config);
   return new StorageEngine(memoryIndex, fileService, config);
 }
 

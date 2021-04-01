@@ -2,10 +2,8 @@ const config = require('./config');
 const logger = require('./logger');
 
 logger.info('Validating environment config...');
-const validateConfig = require('./validator/config');
-const errors = validateConfig(config);
-if (errors.length > 0) {
-  for (const err of errors) {
+if (config.errors.length > 0) {
+  for (const err of config.errors) {
     logger.error(err.message);
   }
   logger.error('Invalid environment config. Exiting.');
@@ -13,7 +11,7 @@ if (errors.length > 0) {
 }
 
 logger.info('Config values:');
-for (const key of Object.keys(config)) {
+for (const key of Object.keys(config).filter((k) => k !== 'errors')) {
   // TODO: redact secret values
   logger.info(`${key}: ${config[key]}`);
 }

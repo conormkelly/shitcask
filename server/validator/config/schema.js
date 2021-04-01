@@ -12,18 +12,32 @@ module.exports = {
     },
     DB_SERVER_PORT: {
       description: 'The port for the server to listen on',
-      type: 'string',
-      pattern: '^\\d+$'
+      type: 'integer',
+      minimum: 80
+    },
+    DB_USE_MEMFS: {
+      description: 'Whether to operate on an in-memory filesystem',
+      type: 'boolean'
+    },
+    READ_BUFFER_BYTE_SIZE: {
+      description: `Limits the size of the buffer used to read files.
+                    Setting this will override defaults and is not recommended, but its useful for testing purposes.`,
+      type: 'integer',
+      minimum: 16,
+      multipleOf: 4
     }
   },
+  required: ['DB_DATA_DIR'],
   errorMessage: {
     required: {
       DB_DATA_DIR: "Environment variable 'DB_DATA_DIR' is required"
     },
     properties: {
-      DB_DATA_DIR: 'DB_DATA_DIR must be a valid directory path',
-      DB_SERVER_PORT: 'DB_SERVER_PORT must be numeric only'
+      DB_DATA_DIR: 'DB_DATA_DIR: must be a valid directory path',
+      DB_SERVER_PORT: 'DB_SERVER_PORT: must be a number',
+      DB_USE_MEMFS: "DB_USE_MEMFS: must be 'true' or 'false'",
+      READ_BUFFER_BYTE_SIZE:
+        'READ_BUFFER_BYTE_SIZE: must be an integer >= 16 that is a multiple of 4'
     }
-  },
-  required: ['DB_DATA_DIR']
+  }
 };

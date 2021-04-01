@@ -10,10 +10,15 @@ const UINT32_BYTE_LEN = Uint32Array.BYTES_PER_ELEMENT;
 class FileService {
   /**
    * @param {fs} fs
+   * @param {{READ_BUFFER_BYTE_SIZE: number}} config
    */
-  constructor (fs) {
+  constructor (fs, config = {}) {
     // Dependencies
     this.fs = fs;
+
+    // Config
+    // Controls'highWaterMark' value for ReadStreams
+    this.READ_BUFFER_BYTE_SIZE = config.READ_BUFFER_BYTE_SIZE;
   }
 
   /**
@@ -79,7 +84,10 @@ class FileService {
       let recordLength = null;
 
       const readStream = this.fs
-        .createReadStream(filePath, { start: offset })
+        .createReadStream(filePath, {
+          start: offset,
+          highWaterMark: this.READ_BUFFER_BYTE_SIZE
+        })
         .on('error', (err) => {
           reject(err);
         })
@@ -162,7 +170,10 @@ class FileService {
       let fileBuffer = null;
 
       this.fs
-        .createReadStream(filePath, { start: 0 })
+        .createReadStream(filePath, {
+          start: 0,
+          highWaterMark: this.READ_BUFFER_BYTE_SIZE
+        })
         .on('error', (err) => {
           reject(err);
         })
@@ -177,19 +188,19 @@ class FileService {
           // While we have records in the buffer
           while (
             fileBuffer.byteLength >=
-            relativePosition + recordLength + UINT32_BYTE_LEN
+            relativePosition + UINT32_BYTE_LEN + recordLength
           ) {
             // Parse the record and set the offset
             recordLength = fileBuffer.readUInt32LE(relativePosition);
             const recordData = fileBuffer.slice(
               relativePosition + UINT32_BYTE_LEN,
-              relativePosition + recordLength + UINT32_BYTE_LEN
+              relativePosition + UINT32_BYTE_LEN + recordLength
             );
             const key = JSON.parse(recordData.toString('utf8')).k;
             fileOffsets.set(key, relativePosition + numBytesParsed);
 
             // Loop will break if buffer exhausted
-            relativePosition += recordLength + UINT32_BYTE_LEN;
+            relativePosition += UINT32_BYTE_LEN + recordLength;
           }
           // If buffer exhausted - relativePosition contains the recordLength for next record
           // Buffer is concatenated on next "data" event so we

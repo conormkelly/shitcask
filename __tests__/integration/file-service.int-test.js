@@ -59,6 +59,13 @@ describe('file-service [INTEGRATION]', () => {
       expect(fileOffsetMap.size).toEqual(100);
     });
 
+    test('can build memory index even with really small buffer size', async () => {
+      const fService = new FileService(memfs, { READ_BUFFER_BYTE_SIZE: 16 });
+      expect(fService.READ_BUFFER_BYTE_SIZE).toEqual(16);
+      const fileOffsetMap = await fService.readFileOffsets(MEM_SEG_FILE);
+      expect(fileOffsetMap.size).toEqual(100);
+    });
+
     test('should throw if invalid filePath supplied', async () => {
       await expect(
         fileService.readFileOffsets('/file/doesnt/exist.seg')
@@ -75,6 +82,28 @@ describe('file-service [INTEGRATION]', () => {
 
       // Act
       const textKeyValue = await fileService.readRecordAtOffset(
+        MEM_SEG_FILE,
+        offsetForFive
+      );
+
+      // The value is raw text - needs to be converted to JSON
+      const jsonKeyValue = JSON.parse(textKeyValue);
+
+      expect(jsonKeyValue.k).toEqual('5');
+      expect(jsonKeyValue.v).toEqual(5);
+    });
+
+    test('can still read record with small buffer size', async () => {
+      const fService = new FileService(memfs, { READ_BUFFER_BYTE_SIZE: 16 });
+      expect(fService.READ_BUFFER_BYTE_SIZE).toEqual(16);
+
+      // Arrange
+      const fileOffsetMap = await fService.readFileOffsets(MEM_SEG_FILE);
+      // This offset would normally come from the memoryIndex
+      const offsetForFive = fileOffsetMap.get('5');
+
+      // Act
+      const textKeyValue = await fService.readRecordAtOffset(
         MEM_SEG_FILE,
         offsetForFive
       );
