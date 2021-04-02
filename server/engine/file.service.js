@@ -92,7 +92,7 @@ class FileService {
           reject(err);
         })
         .on('data', (chunk) => {
-          // If this is the first read, chunk IS the buffer, otherwise concat it to exiting buffer
+          // If this is the first event, chunk IS the buffer, otherwise concat it to existing buffer
           fileBuffer = !fileBuffer ? chunk : Buffer.concat([fileBuffer, chunk]);
           // recordLength only needs to be calculated once
           recordLength = recordLength ?? fileBuffer.readUInt32LE(0);
