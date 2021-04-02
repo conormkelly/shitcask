@@ -33,12 +33,14 @@ _The client will be split into a separate repo in future._
 
 Environment variables are described below.
 
-| Name                  | Type    | Purpose                                                                    | Required? | Default |
-| --------------------- | ------- | -------------------------------------------------------------------------- | --------- | ------- |
-| DB_DATA_DIR           | string  | Sets the directory where the DB writes its files.                          | Yes       | N/A     |
-| DB_SERVER_PORT        | int     | The port for the server to listen on.                                      | No        | 8091    |
-| DB_USE_MEMFS          | boolean | If true, the DB will only operate on an in-memory filesystem.              | No        | false   |
-| READ_BUFFER_BYTE_SIZE | int     | Used to control the highWaterMark for readStreams. Can be left as default. | No        | 16384   |
+| Name                  | Type    | Purpose                                                                              | Required?     | Default |
+| --------------------- | ------- | ------------------------------------------------------------------------------------ | ------------- | ------- |
+| DB_DATA_DIR           | string  | Sets the directory where the DB writes its files.                                    | Yes           | N/A     |
+| DB_SERVER_PORT        | int     | The port for the server to listen on.                                                | No            | 8091    |
+| DB_USE_MEMFS          | boolean | If true, the DB will only operate on an in-memory filesystem.                        | No            | false   |
+| DB_USERNAME           | string  | Enables auth for client to provide when connecting. DB_PASSWORD must also be valued. | Conditionally | N/A     |
+| DB_PASSWORD           | string  | Enables auth for client to provide when connecting. DB_USERNAME must also be valued  | Conditionally | N/A     |
+| READ_BUFFER_BYTE_SIZE | int     | Used to control the highWaterMark for readStreams. Can be left as default.           | No            | 16384   |
 
 See also `dotenv/README.md` for info regarding config during local development.
 
