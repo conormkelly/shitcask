@@ -6,7 +6,11 @@ async function main () {
   console.log('DB_SERVER_PORT:', PORT);
 
   const socketId = await shitcaskClient.connect({
-    url: `http://localhost:${PORT}`
+    url: `http://localhost:${PORT}`,
+    auth: {
+      username: 'test',
+      password: 'test'
+    }
   });
 
   console.log('The socketId is', socketId, '\n');

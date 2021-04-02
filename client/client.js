@@ -26,10 +26,10 @@ class ShitCaskClient {
    *
    * Default timeout is 5 seconds.
    *
-   * @param {{url: string, timeout?: number}} config
+   * @param {{url: string, timeout?: number, auth?: {username: string, password: string}}} config
    * @returns {Promise<string>}
    */
-  async connect ({ url, timeout }) {
+  async connect ({ url, timeout, auth }) {
     return new Promise((resolve, reject) => {
       if (timeout !== undefined) {
         this.timeoutMs = timeout;
@@ -37,7 +37,7 @@ class ShitCaskClient {
 
       try {
         if (!this.isConnected()) {
-          this.socket = this.io(url);
+          this.socket = auth ? this.io(url, { auth }) : this.io(url);
 
           // socket.io will retry forever, so set a timer
           // to give up if server unavailable
@@ -45,6 +45,14 @@ class ShitCaskClient {
             this.socket.close();
             reject(new Error('Initial connection timed out'));
           }, this.timeoutMs);
+
+          this.socket.on('connect_error', (err) => {
+            if (err.data && err.data.code === 'AUTH_FAILED') {
+              clearTimeout(this.socket._firstConnectionTimer);
+              this.socket.close();
+              reject(err);
+            }
+          });
 
           this.socket.on('connect', () => {
             clearTimeout(this.socket._firstConnectionTimer);
