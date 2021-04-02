@@ -142,17 +142,6 @@ describe('Config Validator [UNIT]', () => {
     );
   });
 
-  test('returns correct error for READ_BUFFER_BYTE_SIZE if not a multiple of 4', () => {
-    config.READ_BUFFER_BYTE_SIZE = '255';
-
-    const errors = validateConfig(config);
-
-    expect(errors.length).toEqual(1);
-    expect(errors[0].message).toEqual(
-      ERR_MESSAGES.properties.READ_BUFFER_BYTE_SIZE
-    );
-  });
-
   test('accepts valid numeric string for READ_BUFFER_BYTE_SIZE', () => {
     config.READ_BUFFER_BYTE_SIZE = '32';
 
