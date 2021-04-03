@@ -14,17 +14,14 @@ const getValidator = ajv.compile(schemas.get);
 const setValidator = ajv.compile(schemas.set);
 
 /**
- * Generates a function that applies the validator,
- * and throws an error message (defined in the schema) if it's invalid.
+ * Generates a function that applies the validator and returns an error message if invalid.
  * @param {Function} validator
  * @returns {Function}
  */
 const createValidator = (validator) => {
-  return function validate (req) {
-    if (!validator(req)) {
-      const [error] = validator.errors;
-      throw new Error(error.message);
-    }
+  return function getErrorMessage (req) {
+    // If invalid, only a singleError message can be returned per schema config.
+    return validator(req) ? null : validator.errors[0].message;
   };
 };
 

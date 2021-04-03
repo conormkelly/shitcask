@@ -54,7 +54,9 @@ const AUTH_ENABLED =
 if (AUTH_ENABLED) {
   logger.info('Auth: ENABLED');
   io.use((socket, next) => {
-    logger.info(`Client connection attempt: ${socket.id}`);
+    logger.info(
+      `Authenticating: ${socket.id} (Address: ${socket.handshake.address})`
+    );
 
     const { auth } = socket.handshake;
     if (
@@ -62,6 +64,7 @@ if (AUTH_ENABLED) {
       auth.password === config.DB_PASSWORD
     ) {
       next();
+      logger.info(`Authorized: ${socket.id}`);
     } else {
       // Generates connect_failed event on the client
       const err = new Error(
@@ -69,6 +72,7 @@ if (AUTH_ENABLED) {
       );
       err.data = { code: 'AUTH_FAILED' };
       next(err);
+      logger.info(`Unauthorized: ${socket.id}`);
     }
   });
 } else {
@@ -85,29 +89,39 @@ const { validateGetArgs, validateSetArgs } = require('./validator/req');
 logger.info('Server: Configuring listeners...');
 // Handle GET and SET operations
 io.on('connection', (socket) => {
-  logger.info(`Client connected: ${socket.id}`);
+  logger.info(`Connected: ${socket.id}`);
   socket.on('set', async (req, res) => {
     try {
-      validateSetArgs(req);
-      await storageEngine.set(req.key, req.value);
-      res({ success: true });
+      const errorMessage = validateSetArgs(req);
+
+      if (!errorMessage) {
+        await storageEngine.set(req.key, req.value);
+        return res({ success: true });
+      } else {
+        return res({ success: false, message: errorMessage });
+      }
     } catch (err) {
-      logger.warn(`SetError (${socket.id}) : ${err.message}`);
-      res({ success: false, message: err.message });
+      logger.error(`${socket.id}: SET error ${err.message}`);
+      res({ success: false, message: 'Failed to set value.' });
     }
   });
   socket.on('get', async (req, res) => {
     try {
-      validateGetArgs(req);
-      const value = await storageEngine.get(req.key);
-      res({ success: true, value: value });
+      const errorMessage = validateGetArgs(req);
+
+      if (!errorMessage) {
+        const value = await storageEngine.get(req.key);
+        return res({ success: true, value: value });
+      } else {
+        return res({ success: false, message: errorMessage });
+      }
     } catch (err) {
-      logger.warn(`GetError (${socket.id}) : ${err.message}`);
-      res({ success: false, message: err.message });
+      logger.error(`${socket.id}: GET error ${err.message}`);
+      res({ success: false, message: 'Failed to get value.' });
     }
   });
   socket.on('disconnect', () => {
-    logger.info(`Client disconnected: ${socket.id}`);
+    logger.info(`Disconnected: ${socket.id}`);
   });
 });
 
