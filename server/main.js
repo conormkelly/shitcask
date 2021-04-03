@@ -30,7 +30,7 @@ for (const prop of Object.keys(configSchema.properties)) {
   // Only log required or (optional and valued) props
   if (isRequired || (!isRequired && value !== undefined)) {
     const valueToLog = configSchema.properties[prop].isSensitive
-      ? // Redact value with asterisks if iSensitive in schema
+      ? // Redact value with asterisks if isSensitive in schema
         `${value}`.replace(/./g, '*')
       : // Add ' (default)' if value is the schema default
       value === configSchema.properties[prop].default
