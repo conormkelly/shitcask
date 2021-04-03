@@ -35,6 +35,16 @@ module.exports = {
       pattern: '^(?!\\s*$).+',
       isSensitive: true
     },
+    DB_TLS_CERT_PATH: {
+      description: 'Path to the location of a cert.pem file.',
+      type: 'string',
+      minLength: 1
+    },
+    DB_TLS_KEY_PATH: {
+      description: 'Path to the location of a key.pem file.',
+      type: 'string',
+      minLength: 1
+    },
     READ_BUFFER_BYTE_SIZE: {
       description: `Limits the size of the buffer used to read files.
                     Setting this will override defaults and is not recommended, but its useful for testing purposes.`,
@@ -45,7 +55,9 @@ module.exports = {
   },
   dependencies: {
     DB_USERNAME: ['DB_PASSWORD'],
-    DB_PASSWORD: ['DB_USERNAME']
+    DB_PASSWORD: ['DB_USERNAME'],
+    DB_TLS_KEY_PATH: ['DB_TLS_CERT_PATH'],
+    DB_TLS_CERT_PATH: ['DB_TLS_KEY_PATH']
   },
   required: ['DB_DATA_DIR'],
   errorMessage: {
@@ -58,11 +70,15 @@ module.exports = {
       DB_USE_MEMFS: "DB_USE_MEMFS: must be 'true' or 'false'",
       DB_USERNAME: 'DB_USERNAME: must be a non-empty string',
       DB_PASSWORD: 'DB_PASSWORD: must be a non-empty string',
+      DB_TLS_KEY_PATH: 'DB_TLS_KEY_PATH: must be a valid file path',
+      DB_TLS_CERT_PATH: 'DB_TLS_CERT_PATH: must be a valid file path',
       READ_BUFFER_BYTE_SIZE: 'READ_BUFFER_BYTE_SIZE: must be an integer >= 16'
     },
     dependencies: {
       DB_USERNAME: 'DB_USERNAME: must also provide DB_PASSWORD',
-      DB_PASSWORD: 'DB_PASSWORD: must also provide DB_USERNAME'
+      DB_PASSWORD: 'DB_PASSWORD: must also provide DB_USERNAME',
+      DB_TLS_KEY_PATH: 'DB_TLS_KEY_PATH: must also provide DB_TLS_CERT_PATH',
+      DB_TLS_CERT_PATH: 'DB_TLS_CERT_PATH: must also provide DB_TLS_KEY_PATH'
     }
   }
 };

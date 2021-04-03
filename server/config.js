@@ -9,6 +9,8 @@ const config = {
   DB_USE_MEMFS: process.env.DB_USE_MEMFS,
   DB_USERNAME: process.env.DB_USERNAME,
   DB_PASSWORD: process.env.DB_PASSWORD,
+  DB_TLS_KEY_PATH: process.env.DB_TLS_KEY_PATH,
+  DB_TLS_CERT_PATH: process.env.DB_TLS_CERT_PATH,
   READ_BUFFER_BYTE_SIZE: process.env.READ_BUFFER_BYTE_SIZE
 };
 
