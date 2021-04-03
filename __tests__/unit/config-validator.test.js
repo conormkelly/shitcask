@@ -15,9 +15,13 @@ describe('Config Validator [UNIT]', () => {
       DB_USE_MEMFS: 'true',
       DB_USERNAME: 'test',
       DB_PASSWORD: 'test',
+      DB_TLS_CERT_PATH: '/certs/localhost.crt',
+      DB_TLS_KEY_PATH: '/certs/localhost.key',
       READ_BUFFER_BYTE_SIZE: '16384' // 16kb
     };
   });
+
+  //* General
 
   test('no errors returned if valid', () => {
     const errors = validateConfig(config);
@@ -32,8 +36,25 @@ describe('Config Validator [UNIT]', () => {
     expect(typeof config.DB_USE_MEMFS).toEqual('boolean');
     expect(typeof config.DB_USERNAME).toEqual('string');
     expect(typeof config.DB_PASSWORD).toEqual('string');
+    expect(typeof config.DB_TLS_CERT_PATH).toEqual('string');
+    expect(typeof config.DB_TLS_KEY_PATH).toEqual('string');
     expect(typeof config.READ_BUFFER_BYTE_SIZE).toEqual('number');
   });
+
+  test('returns multiple errors', () => {
+    // Missing DB_DATA_DIR
+    delete config.DB_DATA_DIR;
+    // Non-numeric DB_SERVER_PORT
+    config.DB_SERVER_PORT = '12ABC';
+
+    const errors = validateConfig(config);
+
+    expect(errors.length).toEqual(2);
+    expect(errors[0].message).toEqual(ERR_MESSAGES.required.DB_DATA_DIR);
+    expect(errors[1].message).toEqual(ERR_MESSAGES.properties.DB_SERVER_PORT);
+  });
+
+  //* DB_DATA_DIR
 
   test('returns correct error for DB_DATA_DIR missing', () => {
     delete config.DB_DATA_DIR;
@@ -44,6 +65,8 @@ describe('Config Validator [UNIT]', () => {
     expect(errors[0].message).toEqual(ERR_MESSAGES.required.DB_DATA_DIR);
   });
 
+  //* DB_SERVER_PORT
+
   test('returns correct error for DB_SERVER_PORT non-numeric', () => {
     config.DB_SERVER_PORT = 'NOT A NUM';
 
@@ -53,14 +76,7 @@ describe('Config Validator [UNIT]', () => {
     expect(errors[0].message).toEqual(ERR_MESSAGES.properties.DB_SERVER_PORT);
   });
 
-  test('returns correct error for DB_USE_MEMFS if not boolean', () => {
-    config.DB_USE_MEMFS = 'maybe';
-
-    const errors = validateConfig(config);
-
-    expect(errors.length).toEqual(1);
-    expect(errors[0].message).toEqual(ERR_MESSAGES.properties.DB_USE_MEMFS);
-  });
+  //* DB_USE_MEMFS
 
   test('returns correct error for DB_USE_MEMFS if not boolean', () => {
     config.DB_USE_MEMFS = 'maybe';
@@ -70,6 +86,18 @@ describe('Config Validator [UNIT]', () => {
     expect(errors.length).toEqual(1);
     expect(errors[0].message).toEqual(ERR_MESSAGES.properties.DB_USE_MEMFS);
   });
+
+  test('returns correct error for DB_USE_MEMFS if not boolean', () => {
+    config.DB_USE_MEMFS = 'maybe';
+
+    const errors = validateConfig(config);
+
+    expect(errors.length).toEqual(1);
+    expect(errors[0].message).toEqual(ERR_MESSAGES.properties.DB_USE_MEMFS);
+  });
+
+  //* DB_USERNAME
+  //* DB_PASSWORD
 
   test('is valid without DB_USERNAME and DB_PASSWORD', () => {
     delete config.DB_USERNAME;
@@ -108,6 +136,38 @@ describe('Config Validator [UNIT]', () => {
     expect(errors[0].message).toEqual(ERR_MESSAGES.properties.DB_USERNAME);
     expect(errors[1].message).toEqual(ERR_MESSAGES.properties.DB_PASSWORD);
   });
+
+  //* DB_TLS_KEY_PATH
+  //* DB_TLS_CERT_PATH
+
+  test('is valid without DB_TLS_KEY_PATH and DB_TLS_CERT_PATH', () => {
+    delete config.DB_TLS_KEY_PATH;
+    delete config.DB_TLS_CERT_PATH;
+
+    const errors = validateConfig(config);
+
+    expect(errors.length).toEqual(0);
+  });
+
+  test('is invalid with only DB_TLS_KEY_PATH and no DB_TLS_CERT_PATH', () => {
+    delete config.DB_TLS_CERT_PATH;
+
+    const errors = validateConfig(config);
+
+    expect(errors.length).toEqual(1);
+    expect(errors[0].message).toEqual(ERR_MESSAGES.dependencies.DB_TLS_KEY_PATH);
+  });
+
+  test('is invalid with only DB_TLS_CERT_PATH and no DB_TLS_KEY_PATH', () => {
+    delete config.DB_TLS_KEY_PATH;
+
+    const errors = validateConfig(config);
+
+    expect(errors.length).toEqual(1);
+    expect(errors[0].message).toEqual(ERR_MESSAGES.dependencies.DB_TLS_CERT_PATH);
+  });
+
+  //* READ_BUFFER_BYTE_SIZE
 
   test('returns correct error for READ_BUFFER_BYTE_SIZE if not number', () => {
     config.READ_BUFFER_BYTE_SIZE = 'thirty two';
@@ -148,18 +208,5 @@ describe('Config Validator [UNIT]', () => {
     const errors = validateConfig(config);
 
     expect(errors.length).toEqual(0);
-  });
-
-  test('returns multiple errors', () => {
-    // Missing DB_DATA_DIR
-    delete config.DB_DATA_DIR;
-    // Non-numeric DB_SERVER_PORT
-    config.DB_SERVER_PORT = '12ABC';
-
-    const errors = validateConfig(config);
-
-    expect(errors.length).toEqual(2);
-    expect(errors[0].message).toEqual(ERR_MESSAGES.required.DB_DATA_DIR);
-    expect(errors[1].message).toEqual(ERR_MESSAGES.properties.DB_SERVER_PORT);
   });
 });

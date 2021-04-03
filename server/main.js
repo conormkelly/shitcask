@@ -4,8 +4,9 @@
 const VERSION = process.env.npm_package_version;
 
 // Dependencies
-const http = require('http');
-const socketIo = require('socket.io');
+const express = require('express');
+const app = express();
+const SocketServer = require('./socket');
 
 const logger = require('./logger');
 const configSchema = require('./validator/config/schema');
@@ -41,46 +42,8 @@ for (const prop of Object.keys(configSchema.properties)) {
   }
 }
 
-// Create server
-logger.info('Server: Creating...');
-// TODO: http/https
-const server = http.createServer();
-const io = socketIo(server);
-
-// Check auth
-const AUTH_ENABLED =
-  config.DB_USERNAME !== undefined && config.DB_PASSWORD !== undefined;
-
-if (AUTH_ENABLED) {
-  logger.info('Auth: ENABLED');
-  io.use((socket, next) => {
-    logger.info(
-      `Authenticating: ${socket.id} (Address: ${socket.handshake.address})`
-    );
-
-    const { auth } = socket.handshake;
-    if (
-      auth.username === config.DB_USERNAME &&
-      auth.password === config.DB_PASSWORD
-    ) {
-      next();
-      logger.info(`Authorized: ${socket.id}`);
-    } else {
-      // Generates connect_failed event on the client
-      const err = new Error(
-        'Invalid username / password combination provided.'
-      );
-      err.data = { code: 'AUTH_FAILED' };
-      next(err);
-      logger.info(`Unauthorized: ${socket.id}`);
-    }
-  });
-} else {
-  logger.warn('AUTH: DISABLED');
-  logger.warn(
-    'AUTH: It is strongly recommended to set DB_USERNAME and DB_PASSWORD.'
-  );
-}
+// Configure express then:
+const socketServer = new SocketServer(app, config);
 
 logger.info('StorageEngine: Initializing...');
 const storageEngine = require('./engine/core').initialize();
@@ -88,7 +51,11 @@ const { validateGetArgs, validateSetArgs } = require('./validator/req');
 
 logger.info('Server: Configuring listeners...');
 // Handle GET and SET operations
-io.on('connection', (socket) => {
+
+socketServer.addConnectionListener((socket) => {
+  // TODO: check if client 'secure' config matches server?
+  logger.debug(`Socket secure? ${socket.handshake.secure}`);
+
   logger.info(`Connected: ${socket.id}`);
   socket.on('set', async (req, res) => {
     try {
@@ -128,7 +95,7 @@ io.on('connection', (socket) => {
 // Listen when storageEngine is ready
 storageEngine.on('ready', () => {
   logger.info('StorageEngine: READY');
-  server.listen(config.DB_SERVER_PORT, () => {
+  socketServer.listen(() => {
     logger.info(`Server: Listening on ${config.DB_SERVER_PORT}.`);
   });
 });

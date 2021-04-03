@@ -26,18 +26,19 @@ class ShitCaskClient {
    *
    * Default timeout is 5 seconds.
    *
-   * @param {{url: string, timeout?: number, auth?: {username: string, password: string}}} config
+   * @param {{url: string, timeoutMs?: number, auth?: {username: string, password: string}, secure?: boolean}} config
    * @returns {Promise<string>}
    */
-  async connect ({ url, timeout, auth }) {
+  async connect ({ url, timeoutMs, auth, secure }) {
     return new Promise((resolve, reject) => {
-      if (timeout !== undefined) {
-        this.timeoutMs = timeout;
-      }
+      this.timeoutMs = timeoutMs ?? this.timeoutMs;
+      const useSecureConnection = secure ?? true;
 
       try {
         if (!this.isConnected()) {
-          this.socket = auth ? this.io(url, { auth }) : this.io(url);
+          this.socket = auth
+            ? this.io(url, { auth, secure: useSecureConnection })
+            : this.io(url, { secure: useSecureConnection });
 
           // socket.io will retry forever, so set a timer
           // to give up if server unavailable
@@ -98,7 +99,7 @@ class ShitCaskClient {
 
   /**
    * Get a key value.
-   * @param {*} key
+   * @param {string} key
    * @returns {{success: true, value: any} | {success: false, message: string}}
    */
   async get (key) {
@@ -119,7 +120,7 @@ class ShitCaskClient {
 
   /**
    * Set a key-value pair.
-   * @param {any} key
+   * @param {string} key
    * @param {any} value
    * @returns {{success: true } | {success: false, message: string}}
    *

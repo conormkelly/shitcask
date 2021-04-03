@@ -40,6 +40,8 @@ Environment variables are described below.
 | DB_USE_MEMFS          | boolean | If true, the DB will only operate on an in-memory filesystem.                        | No            | false   |
 | DB_USERNAME           | string  | Enables auth for client to provide when connecting. DB_PASSWORD must also be valued. | Conditionally | N/A     |
 | DB_PASSWORD           | string  | Enables auth for client to provide when connecting. DB_USERNAME must also be valued. | Conditionally | N/A     |
+| DB_TLS_CERT_PATH      | string  | Enables TLS for secure connections. DB_TLS_KEY_PATH must also be valued.             | Conditionally | N/A     |
+| DB_TLS_KEY_PATH       | string  | Enables TLS for secure connections. DB_TLS_CERT_PATH must also be valued.            | Conditionally | N/A     |
 | READ_BUFFER_BYTE_SIZE | int     | Used to control the highWaterMark for readStreams. Can be left as default.           | No            | 16384   |
 
 See also `dotenv/README.md` for info regarding config during local development.
@@ -97,3 +99,5 @@ Where to start...
 - Undergo performance testing.
 - Implement request queue (if needed).
 - Implement compaction strategy.
+- [Investigate compiling AJV serializer and parser](https://ajv.js.org/guide/getting-started.html#parsing-and-serializing-json).
+- Validate filesystem based environment vars.
