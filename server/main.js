@@ -54,7 +54,6 @@ logger.info('Server: Configuring listeners...');
 
 socketServer.addConnectionListener((socket) => {
   // TODO: check if client 'secure' config matches server?
-  logger.debug(`Socket secure? ${socket.handshake.secure}`);
 
   logger.info(`Connected: ${socket.id}`);
   socket.on('set', async (req, res) => {

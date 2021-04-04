@@ -26,19 +26,35 @@ class ShitCaskClient {
    *
    * Default timeout is 5 seconds.
    *
-   * @param {{url: string, timeoutMs?: number, auth?: {username: string, password: string}, secure?: boolean}} config
+   * @param {{
+   *   url: string,
+   *   timeoutMs?: number,
+   *   auth?: {username: string, password: string},
+   *   secure?: boolean,
+   *   allowInvalidCert?: boolean
+   * }} config
    * @returns {Promise<string>}
    */
-  async connect ({ url, timeoutMs, auth, secure }) {
+  async connect (config) {
     return new Promise((resolve, reject) => {
-      this.timeoutMs = timeoutMs ?? this.timeoutMs;
-      const useSecureConnection = secure ?? true;
+      const { url, auth } = config;
+
+      this.timeoutMs = config.timeoutMs ?? this.timeoutMs;
+      const secure = config.secure ?? true;
+      const allowInvalidCert = config.allowInvalidCert ?? false;
 
       try {
         if (!this.isConnected()) {
           this.socket = auth
-            ? this.io(url, { auth, secure: useSecureConnection })
-            : this.io(url, { secure: useSecureConnection });
+            ? this.io(url, {
+                auth,
+                secure,
+                rejectUnauthorized: !allowInvalidCert
+              })
+            : this.io(url, {
+                secure,
+                rejectUnauthorized: !allowInvalidCert
+              });
 
           // socket.io will retry forever, so set a timer
           // to give up if server unavailable

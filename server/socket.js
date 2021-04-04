@@ -22,8 +22,7 @@ class SocketService {
       this.server = https.createServer(
         {
           key: fs.readFileSync(path.resolve(config.DB_TLS_KEY_PATH)),
-          cert: fs.readFileSync(path.resolve(config.DB_TLS_CERT_PATH)),
-          rejectUnauthorized: false
+          cert: fs.readFileSync(path.resolve(config.DB_TLS_CERT_PATH))
         },
         app
       );
@@ -75,7 +74,7 @@ class SocketService {
   }
 
   listen (callback) {
-    this.io.listen(this.DB_SERVER_PORT, callback);
+    this.server.listen(this.DB_SERVER_PORT, callback);
   }
 }
 

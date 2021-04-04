@@ -6,7 +6,7 @@ const Ajv = require('ajv').default;
 
 // Converts types per the schema where possible.
 // See: https://ajv.js.org/coercion.html
-const ajv = new Ajv({ allErrors: true, coerceTypes: true });
+const ajv = new Ajv({ allErrors: true, coerceTypes: true, useDefaults: true });
 
 // Add ajv-errors
 const ajvErrors = require('ajv-errors');
