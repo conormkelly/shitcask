@@ -155,7 +155,9 @@ describe('Config Validator [UNIT]', () => {
     const errors = validateConfig(config);
 
     expect(errors.length).toEqual(1);
-    expect(errors[0].message).toEqual(ERR_MESSAGES.dependencies.DB_TLS_KEY_PATH);
+    expect(errors[0].message).toEqual(
+      ERR_MESSAGES.dependencies.DB_TLS_KEY_PATH
+    );
   });
 
   test('is invalid with only DB_TLS_CERT_PATH and no DB_TLS_KEY_PATH', () => {
@@ -164,7 +166,9 @@ describe('Config Validator [UNIT]', () => {
     const errors = validateConfig(config);
 
     expect(errors.length).toEqual(1);
-    expect(errors[0].message).toEqual(ERR_MESSAGES.dependencies.DB_TLS_CERT_PATH);
+    expect(errors[0].message).toEqual(
+      ERR_MESSAGES.dependencies.DB_TLS_CERT_PATH
+    );
   });
 
   //* READ_BUFFER_BYTE_SIZE
