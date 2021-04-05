@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node ./server/main.js",
     "local": "nodemon -r ./dotenv/config ./server/main.js",
-    "test": "jest --collect-coverage",
-    "coverage": "jest --coverage --collect-coverage-from=./server/**/*.js && npm run coverage:view",
+    "test": "jest --testEnvironment=node --collect-coverage",
+    "coverage": "jest --testEnvironment=node --coverage --collect-coverage-from=./server/**/*.js && npm run coverage:view",
     "coverage:view": "nohup xdg-open ./coverage/lcov-report/index.html >/dev/null 2>&1 || start ./coverage/lcov-report/index.html || open ./coverage/lcov-report/index.html",
     "format:check": "prettier-standard --check",
     "lint:all": "prettier-standard --lint",
